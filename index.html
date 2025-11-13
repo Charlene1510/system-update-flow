@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="zh-tw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>系統版更流程（VN IT）</title>
+    <!-- Tải Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tải Mermaid JS -->
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true });
+    </script>
+    <!-- Cấu hình Tailwind cho font Inter -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'primary-blue': '#3b82f6',
+                        'sidebar-bg': '#f9fafb',
+                        'proposing-team': '#3b82f6',
+                        'dev-team': '#eab308',
+                        'deploy-team': '#ef4444',
+                        'it-manager': '#a855f7',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Tùy chỉnh nhỏ để đảm bảo font Inter được áp dụng */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f4f6f8;
+        }
+        /* Mermaid container */
+        .mermaid {
+            text-align: center;
+        }
+        /* Hidden content */
+        .hidden {
+            display: none;
+        }
+        /* Submenu styles */
+        .step-submenu {
+            transition: all 0.3s ease;
+        }
+        .step-menu-toggle svg {
+            transition: transform 0.3s ease;
+        }
+        .step-menu-toggle.open svg {
+            transform: rotate(90deg);
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <!-- Thanh Tiêu đề (Header) -->
+    <header class="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+            <!-- Tiêu đề Chính -->
+            <div class="flex flex-col">
+                <h1 class="text-xl sm:text-2xl font-semibold text-gray-900">系統版更流程（VN IT）</h1>
+                <p class="text-sm text-gray-500 mt-1">內容：流程圖、步驟說明、重要提醒</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Nội dung Chính (Sidebar + Main Content) -->
+    <div class="flex max-w-7xl mx-auto">
+
+        <!-- Sidebar Navigation (Mục lục bên trái) -->
+        <nav class="hidden md:block w-64 bg-sidebar-bg p-6 border-r border-gray-200 sticky top-16 h-[calc(100vh-64px)] overflow-y-auto">
+            <h2 class="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">目錄</h2>
+
+            <!-- Các mục Menu -->
+            <ul class="space-y-1">
+                <li data-target="flowchart" class="p-2 text-gray-600 rounded-lg hover:bg-gray-200 cursor-pointer text-sm">版更流程圖</li>
+
+                <!-- Mục chính với submenu -->
+                <li class="step-menu-toggle p-2 text-gray-600 rounded-lg hover:bg-gray-200 cursor-pointer text-sm flex items-center justify-between">
+                    <span>版更步驟說明</span>
+                    <svg class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </li>
+
+                <!-- Submenu cho các bước -->
+                <ul class="step-submenu space-y-1 ml-4 hidden">
+                    <li data-target="step1" class="p-2 text-gray-500 rounded-lg hover:bg-gray-200 cursor-pointer text-sm">步驟1：開立變更單</li>
+                    <li data-target="step2" class="p-2 text-gray-500 rounded-lg hover:bg-gray-200 cursor-pointer text-sm">步驟2：準備上版資料</li>
+                    <li data-target="step3" class="p-2 text-gray-500 rounded-lg hover:bg-gray-200 cursor-pointer text-sm">步驟3：系統版更執行</li>
+                    <li data-target="step4" class="p-2 text-gray-500 rounded-lg hover:bg-gray-200 cursor-pointer text-sm">步驟4：版更後結果確認</li>
+                </ul>
+
+                <li data-target="important-notes" class="p-2 text-gray-600 rounded-lg hover:bg-gray-200 cursor-pointer text-sm">重要提醒</li>
+            </ul>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 p-6 md:p-8">
+            <div class="max-w-4xl mx-auto">
+
+                <!-- Tiêu đề Nội dung -->
+                <h2 class="text-3xl font-bold text-gray-900 mb-2">系統版更流程</h2>
+                <p class="text-gray-500 mb-6">（VN IT 版更流程說明）</p>
+
+                <!-- Thẻ nội dung 1: Sơ đồ Quy trình -->
+                <div id="flowchart" class="bg-white p-5 rounded-xl shadow-lg mb-8 border-t-4 border-primary-blue">
+                    <h3 class="flex items-center text-lg font-semibold text-primary-blue mb-3">
+                        <!-- Icon Quy trình/Lưu đồ -->
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M7 11.5V14m0-2.5v2.5m0-2.5h2.5M7 14h2.5M12 10.75V14m0-3.25v3.25m0-3.25h2.5M17 9.5V14m0-4.5v4.5m0-4.5h2.5M12 20.75a8.75 8.75 0 11-17.5 0 8.75 8.75 0 0117.5 0zm-11 0c.25 0 .5-.25.5-.5V14c0-.25-.25-.5-.5-.5H7c-.25 0-.5.25-.5.5v6.25c0 .25.25.5.5.5zm5 0c.25 0 .5-.25.5-.5V14c0-.25-.25-.5-.5-.5H12c-.25 0-.5.25-.5.5v6.25c0 .25.25.5.5.5zm5 0c.25 0 .5-.25.5-.5V14c0-.25-.25-.5-.5-.5H17c-.25 0-.5.25-.5.5v6.25c0 .25.25.5.5.5z" />
+                        </svg>
+                        版更流程圖
+                    </h3>
+                    <div class="flex flex-col lg:flex-row gap-6">
+                        <!-- Flowchart -->
+                        <div class="w-full">
+                            <div class="mermaid">
+                                %%{init: {'themeVariables': {'subgraphTitleFontSize': '1.5em', 'subgraphTitleFontWeight': 'bold'}}}%%
+                                flowchart TD
+                                    subgraph "步驟1：開立變更單"
+                                        A(提出團隊開立變更單) --> B(填寫申請內容)
+                                    end
+
+                                    subgraph "步驟2：準備上版資料"
+                                        D(開發團隊準備上版資料) --> E(測試並附上報告)
+                                        E --> F(註記完成並轉派給上版團隊)
+                                        F -- 通知提出團隊送審 --> G(提出團隊送審)
+                                        G --> H(IT部門主管核准)
+                                    end
+
+                                    subgraph "步驟3：系統版更執行"
+                                        I(上版團隊執行版更)
+                                    end
+
+                                    subgraph "步驟4：版更後結果確認"
+                                        J(記錄結果並轉派回提出團隊) --> K(提出團隊檢查系統狀態)
+                                        K --> L{結果正常?}
+                                        L -- 是 --> M(需修改CMDB?)
+                                        M -- 否 --> P(結案變更申請單) --> S(流程結束)
+                                        M -- 是 --> N(轉為組態異動單)
+                                        N -- 派給開發團隊 --> O(開發團隊執行及結案)
+                                        O --> P
+                                        L -- 否 --> Q(於討論區說明問題)
+                                    end
+
+                                    B -- 轉派 --> D
+                                    H --> I
+                                    I --> J
+                                    Q -- 退回 --> D
+
+                                    %% Style definitions
+                                    style A fill:#3b82f6,stroke:#2563eb,stroke-width:2px,color:#fff
+                                    style B fill:#3b82f6,stroke:#2563eb,stroke-width:2px,color:#fff
+                                    style G fill:#3b82f6,stroke:#2563eb,stroke-width:2px,color:#fff
+                                    style K fill:#3b82f6,stroke:#2563eb,stroke-width:2px,color:#fff
+                                    style L fill:#3b82f6,stroke:#2563eb,stroke-width:2px,color:#fff
+                                    style M fill:#3b82f6,stroke:#2563eb,stroke-width:2px,color:#fff
+                                    style P fill:#3b82f6,stroke:#2563eb,stroke-width:2px,color:#fff
+                                    style S fill:#3b82f6,stroke:#2563eb,stroke-width:2px,color:#fff
+                                    style Q fill:#3b82f6,stroke:#2563eb,stroke-width:2px,color:#fff
+
+                                    style D fill:#eab308,stroke:#ca8a04,stroke-width:2px,color:#fff
+                                    style E fill:#eab308,stroke:#ca8a04,stroke-width:2px,color:#fff
+                                    style F fill:#eab308,stroke:#ca8a04,stroke-width:2px,color:#fff
+                                    style N fill:#3b82f6,stroke:#2563eb,stroke-width:2px,color:#fff
+                                    style O fill:#eab308,stroke:#ca8a04,stroke-width:2px,color:#fff
+
+                                    style I fill:#ef4444,stroke:#dc2626,stroke-width:2px,color:#fff
+                                    style J fill:#ef4444,stroke:#dc2626,stroke-width:2px,color:#fff
+
+                                    style H fill:#a855f7,stroke:#9333ea,stroke-width:2px,color:#fff
+                            </div>
+                        </div>
+
+                        <!-- Chú thích màu sắc -->
+                        <div class="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                            <h4 class="text-md font-semibold text-gray-800 mb-2 flex items-center whitespace-nowrap">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                顏色說明
+                            </h4>
+                            <div class="space-y-1">
+                                <!-- 提出團隊 -->
+                                <div class="flex items-center">
+                                    <div class="w-4 h-4 rounded mr-2 flex-shrink-0" style="background-color: #3b82f6; border: 2px solid #2563eb;"></div>
+                                    <span class="text-sm text-gray-700 whitespace-nowrap">提出團隊</span>
+                                </div>
+                                <!-- 開發團隊 -->
+                                <div class="flex items-center">
+                                    <div class="w-4 h-4 rounded mr-2 flex-shrink-0" style="background-color: #eab308; border: 2px solid #ca8a04;"></div>
+                                    <span class="text-sm text-gray-700 whitespace-nowrap">開發團隊</span>
+                                </div>
+                                <!-- 上版團隊 -->
+                                <div class="flex items-center">
+                                    <div class="w-4 h-4 rounded mr-2 flex-shrink-0" style="background-color: #ef4444; border: 2px solid #dc2626;"></div>
+                                    <span class="text-sm text-gray-700 whitespace-nowrap">上版團隊</span>
+                                </div>
+                                <!-- IT部門主管 -->
+                                <div class="flex items-center">
+                                    <div class="w-4 h-4 rounded mr-2 flex-shrink-0" style="background-color: #a855f7; border: 2px solid #9333ea;"></div>
+                                    <span class="text-sm text-gray-700 whitespace-nowrap">IT部門主管</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Thẻ nội dung 2: Bước 1 -->
+                <div id="step1" class="bg-white p-5 rounded-xl shadow-lg mb-8 border-t-4 border-proposing-team hidden">
+                    <h3 class="flex items-center text-lg font-semibold text-blue-700 mb-4">
+                        <!-- Icon Bước -->
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        步驟1：開立變更單
+                    </h3>
+                    <p class="text-gray-700 mb-4 text-sm">
+                        <strong>執行者：</strong> 提出團隊（推動／規劃）<br>
+                        <strong>目標：</strong> 啟動版更流程，提供完整的更新需求資訊，以便開發團隊及相關單位進行準備。
+                    </p>
+                    <ul class="space-y-2 text-sm">
+                        <li>• 由提出團隊於 ASE 系統建立變更申請單。</li>
+                        <li>• 依以下規範完整填寫更新申請內容：標題格式：更新日期（MM/DD）hh:mm AP／DB／HW 系統名稱。</li>
+                        <li>• 1. 主機資訊（IP、Host Name）</li>
+                        <li>• 2. 影響範圍（國家、事業群、區域、工廠）</li>
+                        <li>• 3. 上版內容（必須附上申請單連結與 ASE 單號，並上傳測試報告文件）</li>
+                        <li>• 4. 特殊事項（例如：需 DBA 於更新前備份、預計停機時間、其他注意事項）</li>
+                        <li>• 5. 轉組態異動單： Y / N（若需修改 CMDB，請選 Y）</li>
+                        <li>• 將申請單轉派給開發團隊準備上版資料。</li>
+                    </ul>
+                </div>
+
+                <!-- Thẻ nội dung 3: Bước 2 -->
+                <div id="step2" class="bg-white p-5 rounded-xl shadow-lg mb-8 border-t-4 border-dev-team hidden">
+                    <h3 class="flex items-center text-lg font-semibold text-yellow-700 mb-4">
+                        <!-- Icon Bước -->
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        步驟2：準備上版資料
+                    </h3>
+                    <p class="text-gray-700 mb-4 text-sm">
+                        <strong>執行者：</strong> 開發團隊<br>
+                        <strong>目標：</strong> 準備完整且經測試驗證的更新版本，確保品質，供上版團隊執行。
+                    </p>
+                    <ul class="space-y-2 text-sm">
+                        <li>• 開發團隊接收提出團隊的變更申請單。</li>
+                        <li>• 檢查申請內容，如有不清楚之處，請於「討論區」回覆並通知提出團隊。</li>
+                        <li>• 準備上版資料，並進行測試（測試對象由開發團隊與提出團隊自行確認）。</li>
+                        <li>• 測試完成後，於變更申請單中附上測試報告檔案。</li>
+                        <li>• 開發團隊於申請單上註記：上版資料準備完成，提供儲存位置與執行順序，供上版團隊了解如何設定上版參數。</li>
+                        <li>• 準備完成後：將變更申請單轉派上版團隊以準備系統版更，同時通知提出團隊進行送審變更申請單。</li>
+                    </ul>
+                </div>
+
+                <!-- Thẻ nội dung 4: Bước 3 -->
+                <div id="step3" class="bg-white p-5 rounded-xl shadow-lg mb-8 border-t-4 border-deploy-team hidden">
+                    <h3 class="flex items-center text-lg font-semibold text-red-700 mb-4">
+                        <!-- Icon Bước -->
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        步驟3：系統版更執行
+                    </h3>
+                    <p class="text-gray-700 mb-4 text-sm">
+                        <strong>執行者：</strong> 上版團隊（DBA）<br>
+                        <strong>目標：</strong> 依開發團隊提供的上版資料進行系統版更，並完整記錄結果。
+                    </p>
+                    <ul class="space-y-2 text-sm">
+                        <li>• 確認 IT 部門主管之核准狀態。</li>
+                        <li>• 依核准排程執行系統版更。</li>
+                        <li>• 於變更單中記錄版更結果。</li>
+                        <li>• 將申請單轉派回提出團隊進行確認與驗收。</li>
+                    </ul>
+                </div>
+
+                <!-- Thẻ nội dung 5: Bước 4 -->
+                <div id="step4" class="bg-white p-5 rounded-xl shadow-lg mb-8 border-t-4 border-proposing-team hidden">
+                    <h3 class="flex items-center text-lg font-semibold text-blue-700 mb-4">
+                        <!-- Icon Bước -->
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        步驟4：版更後結果確認
+                    </h3>
+                    <p class="text-gray-700 mb-4 text-sm">
+                        <strong>執行者：</strong> 提出團隊<br>
+                        <strong>目標：</strong> 確保系統版更符合需求，資料穩定。
+                    </p>
+                    <ul class="space-y-2 text-sm">
+                        <li>• 檢查版更後之系統運作狀態。</li>
+                        <li>• 於變更申請單上記錄結果（正常／異常）。</li>
+                        <li>• 若發現異常，請於「討論區」詳細說明問題，並將單據退回給開發團隊，流程回到步驟 2重新執行。</li>
+                        <li>• 若無異常但需修改 CMDB，則轉為組態異動單並派給開發團隊執行及結案。</li>
+                        <li>• 所有確認完成後，結案變更申請單，版更流程結束。</li>
+                    </ul>
+                </div>
+
+                <!-- Thẻ nội dung 6: Lưu ý Quan trọng -->
+                <div id="important-notes" class="bg-white p-5 rounded-xl shadow-lg border-t-4 border-it-manager hidden">
+                    <h3 class="flex items-center text-lg font-semibold text-purple-700 mb-4">
+                        <!-- Icon Cảnh báo -->
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                        </svg>
+                        重要提醒
+                    </h3>
+                    <ul class="space-y-2 text-sm text-gray-700">
+                        <li>• 變更申請單須經 IT 部門主管核准後方可生效。</li>
+                        <li>• 變更申請單完成檢查並完整記錄進度後即可結案。</li>
+                    </ul>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- JavaScript: Cho phép AI tùy chỉnh tương tác tại đây -->
+    <script>
+        // 這是 AI 可以添加互動功能的地方
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('系統版更流程網頁載入成功！');
+
+            // Hàm hiển thị nội dung
+            function showContent(targetId) {
+                // Ẩn tất cả nội dung
+                document.querySelectorAll('main > div > div[id]').forEach(div => {
+                    div.classList.add('hidden');
+                });
+                // Hiển thị nội dung được chọn
+                const targetDiv = document.getElementById(targetId);
+                if (targetDiv) {
+                    targetDiv.classList.remove('hidden');
+                }
+            }
+
+            // Bắt sự kiện click vào menu
+            document.querySelectorAll('nav li').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    const target = e.target.closest('li').getAttribute('data-target');
+
+                    // Xử lý toggle submenu
+                    if (e.target.closest('li').classList.contains('step-menu-toggle')) {
+                        const submenu = document.querySelector('.step-submenu');
+                        const toggleItem = e.target.closest('li');
+
+                        submenu.classList.toggle('hidden');
+                        toggleItem.classList.toggle('open');
+
+                        // Cập nhật trạng thái visual cho mục chính
+                        if (submenu.classList.contains('hidden')) {
+                            toggleItem.classList.remove('bg-primary-blue', 'text-white', 'font-medium', 'shadow-md');
+                            toggleItem.classList.add('text-gray-600', 'hover:bg-gray-200');
+                        } else {
+                            toggleItem.classList.add('bg-primary-blue', 'text-white', 'font-medium', 'shadow-md');
+                            toggleItem.classList.remove('text-gray-600', 'hover:bg-gray-200');
+                        }
+                        return;
+                    }
+
+                    if (target) {
+                        showContent(target);
+
+                        // Cập nhật trạng thái menu
+                        document.querySelectorAll('nav li').forEach(li => {
+                            li.classList.remove('bg-primary-blue', 'text-white', 'font-medium', 'shadow-md');
+                            if (!li.classList.contains('step-menu-toggle')) {
+                                li.classList.add('text-gray-600', 'hover:bg-gray-200');
+                            }
+                        });
+
+                        // Reset trạng thái mục chính submenu
+                        document.querySelector('.step-menu-toggle').classList.remove('bg-primary-blue', 'text-white', 'font-medium', 'shadow-md');
+                        document.querySelector('.step-menu-toggle').classList.add('text-gray-600', 'hover:bg-gray-200');
+
+                        e.target.closest('li').classList.add('bg-primary-blue', 'text-white', 'font-medium', 'shadow-md');
+                        e.target.closest('li').classList.remove('text-gray-600', 'hover:bg-gray-200');
+                    }
+                });
+            });
+
+            // Hiển thị nội dung mặc định (flowchart)
+            showContent('flowchart');
+            document.querySelector('nav li[data-target="flowchart"]').classList.add('bg-primary-blue', 'text-white', 'font-medium', 'shadow-md');
+            document.querySelector('nav li[data-target="flowchart"]').classList.remove('text-gray-600', 'hover:bg-gray-200');
+        });
+    </script>
+</body>
+</html>
