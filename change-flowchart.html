@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Change Flowchart - 變更單操作流程</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .mermaid {
+            display: flex;
+            justify-content: center;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+        <a href="index.html" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;" data-key="backToMain">← Quay lại trang chính</a>
+        <div class="language-selector">
+            <label for="language-select">Language:</label>
+            <select id="language-select" onchange="setLanguage(this.value)">
+                <option value="en">English</option>
+                <option value="vi">Tiếng Việt</option>
+                <option value="zh-TW">Chinese Traditional</option>
+            </select>
+        </div>
+    </div>
+    <h1 data-key="flowchartTitle">變更單操作流程 (Change Flowchart)</h1>
+        <div class="mermaid" id="mermaid-chart">
+flowchart TD
+    subgraph left [組態單]
+        A2[組態異動單已登記] --> B2[已分類]
+        B2 --> C2[異動準備]
+        C2 --> D2[提交異動結果]
+        D2 --> E2{主管確認}
+
+        E2 -->|退回| B2
+        E2 -->|通過| F2[異動CMDB]
+        F2 --> DB[(變更CMDB)]
+
+        F2 --> G2[組態異動單已完成]
+        G2 --> H2[組態異動單已關閉]
+        H2 --> End2((End))
+    end
+
+    subgraph right [變更單]
+        Start((Start)) --> A[變更單已登記]
+        A --> B[已分類]
+
+        %% 一般 / 緊急變更
+        B -->|一般變更| C[評估中]
+        C --> D[提交評估結果]
+        D --> E{主管審核}
+
+        B -->|緊急變更| E
+
+        E -->|退回| B
+        E -->|通過| F[變更計劃]
+
+        %% 實施階段
+        F --> G[實施]
+        G --> K{是否轉組態異動單}
+
+        K -->|是| A2[組態異動單已登記]
+        K -->|否| H{變更是否成功}
+
+        H -->|否| F
+        H -->|是| I[變更單已完成]
+I --> J[變更單已關閉]
+J --> End1((End))
+    end
+</div>
+               
+    </div>
+    <script>
+        const translations = {
+            "en": {
+                "backToMain": "← Back to Main Page",
+                "flowchartTitle": "Change Flowchart",
+                "left": "Configuration Order",
+                "A2": "Configuration Change Order Registered",
+                "B2": "Categorized",
+                "C2": "Change Preparation",
+                "D2": "Submit Change Results",
+                "E2": "Manager Confirmation",
+                "return": "Return",
+                "pass": "Pass",
+                "F2": "Change CMDB",
+                "DB": "Change CMDB",
+                "G2": "Configuration Change Order Completed",
+                "H2": "Configuration Change Order Closed",
+                "End2": "End",
+                "right": "Change Order",
+                "Start": "Start",
+                "A": "Change Order Registered",
+                "B": "Categorized",
+                "generalChange": "General Change",
+                "C": "In Evaluation",
+                "D": "Submit Evaluation Results",
+                "E": "Manager Review",
+                "emergencyChange": "Emergency Change",
+                "F": "Change Plan",
+                "G": "Implementation",
+                "K": "Transfer to Configuration Change Order?",
+                "yes": "Yes",
+                "no": "No",
+                "H": "Change Successful?",
+                "I": "Change Order Completed",
+                "J": "Change Order Closed",
+                "End1": "End"
+            },
+            "vi": {
+                "backToMain": "← Quay lại trang chính",
+                "flowchartTitle": "Lưu trình thao tác đơn cập nhật",
+                "left": "Đơn thay đổi cấu hình",
+                "A2": "Đơn thay đổi cấu hình đã đăng ký",
+                "B2": "Đã phân loại",
+                "C2": "Chuẩn bị thay đổi",
+                "D2": "Gửi kết quả thay đổi",
+                "E2": "Chủ quản xác nhận",
+                "return": "Trả lại",
+                "pass": "Thông qua",
+                "F2": "Thay đổi CMDB",
+                "DB": "Thay đổi CMDB",
+                "G2": "Đơn thay đổi cấu hình đã hoàn thành",
+                "H2": "Đơn thay đổi cấu hình đã đóng",
+                "End2": "Kết thúc",
+                "right": "Đơn cập nhật",
+                "Start": "Bắt đầu",
+                "A": "Đơn cập nhật đã đăng ký",
+                "B": "Đã phân loại",
+                "generalChange": "Cập nhật bình thường",
+                "C": "Đang đánh giá",
+                "D": "Gửi kết quả đánh giá",
+                "E": "Chủ quản xem xét",
+                "emergencyChange": "Cập nhật khẩn cấp",
+                "F": "Kế hoạch cập nhật",
+                "G": "Thực hiện",
+                "K": "Chuyển sang đơn thay đổi cấu hình?",
+                "yes": "Có",
+                "no": "Không",
+                "H": "Cập nhật thành công?",
+                "I": "Đơn cập nhật đã hoàn thành",
+                "J": "Đơn cập nhật đã đóng",
+                "End1": "Kết thúc"
+            },
+            "zh-TW": {
+                "backToMain": "← 返回主頁",
+                "flowchartTitle": "變更單操作流程",
+                "left": "組態單",
+                "A2": "組態異動單已登記",
+                "B2": "已分類",
+                "C2": "異動準備",
+                "D2": "提交異動結果",
+                "E2": "主管確認",
+                "return": "退回",
+                "pass": "通過",
+                "F2": "異動CMDB",
+                "DB": "變更CMDB",
+                "G2": "組態異動單已完成",
+                "H2": "組態異動單已關閉",
+                "End2": "結束",
+                "right": "變更單",
+                "Start": "開始",
+                "A": "變更單已登記",
+                "B": "已分類",
+                "generalChange": "一般變更",
+                "C": "評估中",
+                "D": "提交評估結果",
+                "E": "主管審核",
+                "emergencyChange": "緊急變更",
+                "F": "變更計劃",
+                "G": "實施",
+                "K": "是否轉組態異動單",
+                "yes": "是",
+                "no": "否",
+                "H": "變更是否成功",
+                "I": "變更單已完成",
+                "J": "變更單已關閉",
+                "End1": "結束"
+            }
+        };
+
+        function getMermaidChartDefinition(lang) {
+            const t = translations[lang];
+            return `flowchart TD
+    subgraph left [${t.left}]
+        A2[${t.A2}] --> B2[${t.B2}]
+        B2 --> C2[${t.C2}]
+        C2 --> D2[${t.D2}]
+        D2 --> E2{${t.E2}}
+
+        E2 -->|${t.return}| B2
+        E2 -->|${t.pass}| F2[${t.F2}]
+        F2 --> DB[(${t.DB})]
+
+        F2 --> G2[${t.G2}]
+        G2 --> H2[${t.H2}]
+        H2 --> End2((${t.End2}))
+    end
+
+    subgraph right [${t.right}]
+        Start((${t.Start})) --> A[${t.A}]
+        A --> B[${t.B}]
+
+        %% 一般 / 緊急變更
+        B -->|${t.generalChange}| C[${t.C}]
+        C --> D[${t.D}]
+        D --> E{${t.E}}
+
+        B -->|${t.emergencyChange}| E
+
+        E -->|${t.return}| B
+        E -->|${t.pass}| F[${t.F}]
+
+        %% 實施階段
+        F --> G[${t.G}]
+        G --> K{${t.K}}
+
+        K -->|${t.yes}| A2[${t.A2}]
+        K -->|${t.no}| H{${t.H}}
+
+        H -->|${t.no}| F
+        H -->|${t.yes}| I[${t.I}]
+        I --> J[${t.J}]
+        J --> End1((${t.End1}))
+    end`;
+        }
+
+        function applyTranslations(lang) {
+            const t = translations[lang];
+            document.querySelectorAll('[data-key]').forEach(element => {
+                const key = element.getAttribute('data-key');
+                if (t[key]) {
+                    element.textContent = t[key];
+                }
+            });
+
+            // Update Mermaid chart
+            const mermaidDiv = document.querySelector('.mermaid');
+            const chartDefinition = getMermaidChartDefinition(lang);
+            mermaid.render('mermaid-chart-svg', chartDefinition).then(({ svg }) => {
+                mermaidDiv.innerHTML = svg;
+            });
+        }
+
+        function setLanguage(lang) {
+            localStorage.setItem('selectedLanguage', lang);
+            document.documentElement.lang = lang;
+            applyTranslations(lang);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            mermaid.initialize({ startOnLoad: false }); // Initialize once, but don't render on load
+            const savedLanguage = localStorage.getItem('selectedLanguage') || 'vi'; // Default to Vietnamese
+            document.getElementById('language-select').value = savedLanguage;
+            setLanguage(savedLanguage);
+            // Initial render of the flowchart
+            const initialChartDefinition = getMermaidChartDefinition(savedLanguage);
+            mermaid.render('mermaid-chart-svg', initialChartDefinition).then(({ svg }) => {
+                document.getElementById('mermaid-chart').innerHTML = svg;
+            });
+        });
+    </script>
+</body>
+</html>
