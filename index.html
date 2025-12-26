@@ -231,7 +231,7 @@
                     </p>
                     <ul class="list-disc list-inside text-slate-700 space-y-2">
                         <li data-i18n="scope-team1">提出版更計劃團隊（規劃、推動、硬體）</li>
-                        <li data-i18n="scope-team2">支援版更團隊（DEV、DBA、Infra）</li>
+                        <li data-i18n="scope-team2">支援版更團隊（DEV、DBA、Infra、Service Desk）</li>
                     </ul>
                 </div>
                 <div>
@@ -288,7 +288,7 @@
                     <li data-i18n="pre-confirmation-2">版更內容與執行範圍：明確變更項目及影響系統</li>
                     <li data-i18n="pre-confirmation-3">影響評估：評估對人、作業、時間、環境與系統資源之影響</li>
                     <li data-i18n="pre-confirmation-4">更新類型（Normal / Emergency）: 確認為一般或緊急版更</li>
-                    <li data-i18n="pre-confirmation-5">支援可行性：確認 DEV， DBA，Infra 是否可配合執行版更</li>
+                    <li data-i18n="pre-confirmation-5">支援可行性：確認 DEV， DBA，Infra，Service Desk 是否可配合執行版更</li>
                 </ul>
             </section>
 
@@ -389,8 +389,30 @@
                 <ul class="list-disc list-inside text-slate-700 space-y-2">
                     <li data-i18n="implementation-1">版更作業須<strong>完全依照 ASE變更單核准內容執行</strong></li>
                     <li data-i18n="implementation-2">技術條件，執行順序，版更資料存放連結 <strong>由DEV提供在ASE變更單的討論區</strong></li>
-                    <li data-i18n="implementation-3">版更結果須完整記錄在ASE變更單的討論區</li>
+                    <li data-i18n="implementation-3">版更執行者須完整記錄版更結果在ASE變更單的討論區</li>
                 </ul>
+
+                ---
+
+                <div class="mb-6">
+                    <h3 class="text-2xl font-bold text-slate-800 mb-4" data-i18n="executor-title">指定版更執行者（Executor）</h3>
+                    <div class="mb-4">
+                        <h4 class="text-xl font-bold text-slate-700 mb-2" data-i18n="executor-app-title">1. Application:</h4>
+                        <ul class="list-disc list-inside text-slate-700 space-y-2">
+                            <li data-i18n="executor-app-1"><strong>G2FW，Springboot, PB</strong>: 由DBA執行</li>
+                            <li data-i18n="executor-app-2"><strong>PCC Mobile Platform</strong>: 由Roger/Ezko執行</li>
+                            <li data-i18n="executor-app-3"><strong>SJS</strong>: 由Service Desk執行</li>
+                        </ul>
+                    </div>
+                    <div class="mb-4">
+                        <h4 class="text-xl font-bold text-slate-700 mb-2" data-i18n="executor-db-title">2. Database:</h4>
+                        <p class="text-slate-700" data-i18n="executor-db-desc">統一由DBA執行版更</p>
+                    </div>
+                    <div>
+                        <h4 class="text-xl font-bold text-slate-700 mb-2" data-i18n="executor-infra-title">3. Infrastructure:</h4>
+                        <p class="text-slate-700" data-i18n="executor-infra-desc">統一由當地Infra執行版更</p>
+                    </div>
+                </div>
             </section>
 
             <!-- 5.結果確認 -->
@@ -465,7 +487,7 @@
                 "scope-desc1": "- 適用於<strong>所有正式區環境之系統版更作業</strong> （Application / Database / Infrastructure）",
                     "scope-desc2": "- 適用團隊：",
                     "scope-team1": "提出版更計劃團隊（規劃、推動、硬體）",
-                    "scope-team2": "支援版更團隊（DEV、DBA、Infra）",
+                    "scope-team2": "支援版更團隊（DEV、DBA、Infra、Service Desk）",
                     "principles-general-title": "整體作業原則（General Principles）",
                     "principles-general-1": "版更內容須<strong>先完成確認</strong>，再進入正式流程",
                     "principles-general-2": "<strong>ASE 變更單為唯一正式紀錄、核准與執行依據</strong>",
@@ -485,7 +507,7 @@
                     "pre-confirmation-2": "版更內容與執行範圍：明確變更項目及影響系統",
                     "pre-confirmation-3": "影響評估：評估對人、作業、時間、環境與系統資源之影響",
                     "pre-confirmation-4": "更新類型（Normal / Emergency）: 確認為一般或緊急版更",
-                    "pre-confirmation-5": "支援可行性：確認 DEV， DBA，Infra 是否可配合執行版更",
+                    "pre-confirmation-5": "支援可行性：確認 DEV， DBA，Infra，Service Desk 是否可配合執行版更",
                     "preparation-title": "2.版更資訊準備（Preparation）",
                     "preparation-desc": "完成確認後，以下資訊須事先準備完成，並作為後續核准與執行依據：",
                     "preparation-1": "版更內容說明：說明變更項目與重點",
@@ -522,7 +544,7 @@
                     "implementation-title": "4.版更執行（Implementation）",
                     "implementation-1": "版更作業須<strong>完全依照 ASE變更單核准內容執行</strong>",
                     "implementation-2": "技術條件，執行順序，版更資料存放連結 <strong>由DEV提供在ASE變更單的討論區</strong>",
-                    "implementation-3": "版更結果須完整記錄在ASE變更單的討論區",
+                    "implementation-3": "版更執行者須完整記錄版更結果在ASE變更單的討論區",
                     "verification-title": "5.結果確認（Verification）",
                     "verification-1": "版更完成後 <strong>由提出團隊進行系統確認</strong>, 若系統運作正常，須完成結案變更單",
                     "closure-title": "6.結案（Closure）",
@@ -532,7 +554,16 @@
                     "cmdb-process-ap": "<strong>AP</strong>：由DEV維護",
                     "cmdb-process-db": "<strong>DB</strong>：由DBA維護",
                     "cmdb-process-infra": "<strong>OS/Server/ Firewall/ Hypervisor</strong>：由Infra維護",
-                    "cmdb-process-2": "負責維護 CI 的團隊進行處理，並完成組態單結案"
+                    "cmdb-process-2": "負責維護 CI 的團隊進行處理，並完成組態單結案",
+                    "executor-title": "指定版更執行者（Executor）",
+                    "executor-app-title": "1. Application:",
+                    "executor-app-1": "<strong>G2FW，Springboot, PB</strong>: 由DBA執行",
+                    "executor-app-2": "<strong>PCC Mobile Platform</strong>: 由Roger/Ezko執行",
+                    "executor-app-3": "<strong>SJS</strong>: 由Service Desk執行",
+                    "executor-db-title": "2. Database:",
+                    "executor-db-desc": "統一由DBA執行版更",
+                    "executor-infra-title": "3. Infrastructure:",
+                    "executor-infra-desc": "統一由當地Infra執行版更"
                 },
             en: {
                 title: "System Version Update Standard Operating Procedure",
@@ -550,7 +581,7 @@
                 "scope-desc1": "- Applies to <strong>all production environment system version update operations</strong> (Application / Database / Infrastructure)",
                 "scope-desc2": "- Applicable teams:",
                 "scope-team1": "Teams proposing version update plans (planning, promotion, hardware)",
-                "scope-team2": "Supporting version update teams (DEV, DBA, Infra)",
+                    "scope-team2": "Supporting version update teams (DEV, DBA, Infra, Service Desk)",
                 "principles-general-title": "General Operating Principles",
                 "principles-general-1": "Version update content must be <strong>confirmed first</strong>, then enter the formal process",
                 "principles-general-2": "<strong>ASE change request is the only official record, approval and execution basis</strong>",
@@ -570,7 +601,7 @@
                 "pre-confirmation-2": "Version update content and execution scope: Clearly define change items and affected systems",
                 "pre-confirmation-3": "Impact assessment: Assess impact on people, operations, time, environment and system resources",
                 "pre-confirmation-4": "Version update type (Normal / Emergency): Confirm if it's normal or emergency version update",
-                "pre-confirmation-5": "Support feasibility: Confirm if DEV, DBA, Infra can support version update execution",
+                    "pre-confirmation-5": "Support feasibility: Confirm if DEV, DBA, Infra, Service Desk can support version update execution",
                 "preparation-title": "2. Version Update Information Preparation",
                 "preparation-desc": "After confirmation, the following information must be prepared in advance and serve as the basis for subsequent approval and execution:",
                 "preparation-1": "Version update content description: Describe change items and key points",
@@ -607,7 +638,7 @@
                 "implementation-title": "4. Version Update Implementation",
                 "implementation-1": "Version update operations must be <strong>executed completely according to ASE change request approved content</strong>",
                 "implementation-2": "Technical conditions, execution sequence, version update data storage links <strong>provided by DEV in ASE change request discussion area</strong>",
-                "implementation-3": "Version update results must be fully recorded",
+                "implementation-3": "The version update executor must fully record the version update results in the ASE change request discussion area",
                 "verification-title": "5. Result Verification",
                 "verification-1": "After version update completion, <strong>the proposing team performs system confirmation</strong>. If the system operates normally, the change request must be closed.",
                 "closure-title": "6. Closure",
@@ -617,7 +648,16 @@
                 "cmdb-process-ap": "<strong>AP</strong>: Maintained by DEV",
                 "cmdb-process-db": "<strong>DB</strong>: Maintained by DBA",
                 "cmdb-process-infra": "<strong>OS/Server/ Firewall/ Hypervisor</strong>: Maintained by Infra",
-                "cmdb-process-2": "The team responsible for maintaining CI performs processing and completes the configuration change request closure"
+                    "cmdb-process-2": "The team responsible for maintaining CI performs processing and completes the configuration change request closure",
+                    "executor-title": "Specified Version Update Executor",
+                    "executor-app-title": "1. Application:",
+                    "executor-app-1": "<strong>G2FW, Springboot, PB</strong>: Executed by DBA",
+                    "executor-app-2": "<strong>PCC Mobile Platform</strong>: Executed by Roger/Ezko",
+                    "executor-app-3": "<strong>SJS</strong>: Executed by Service Desk",
+                    "executor-db-title": "2. Database:",
+                    "executor-db-desc": "Unified execution by DBA",
+                    "executor-infra-title": "3. Infrastructure:",
+                    "executor-infra-desc": "Unified execution by local Infra"
             },
             vi: {
                 title: "Quy trình Cập nhật Hệ thống Tiêu chuẩn",
@@ -635,7 +675,7 @@
                 "scope-desc1": "- Áp dụng cho <strong>tất cả các hoạt động cập nhật hệ thống thuộc môi trường chính</strong> (Ứng dụng / Cơ sở dữ liệu / Cơ sở hạ tầng)",
                 "scope-desc2": "- Các đội ngũ áp dụng:",
                 "scope-team1": "Đội ngũ đề xuất kế hoạch cập nhật (Qui hoạch, Thúc đẩy, Phần cứng)",
-                "scope-team2": "Đội ngũ hỗ trợ (DEV, DBA, Infra)",
+                    "scope-team2": "Đội ngũ hỗ trợ (DEV, DBA, Infra, Service Desk)",
                 "principles-general-title": "Nguyên tắc Hoạt động Tổng thể",
                 "principles-general-1": "Nội dung cập nhật phải được <strong>xác nhận trước</strong>, sau đó mới vào quy trình chính thức",
                 "principles-general-2": "<strong>Đơn cập nhật ASE là cơ sở ghi nhận chính thức duy nhất, phê duyệt và thực hiện</strong>",
@@ -655,7 +695,7 @@
                 "pre-confirmation-2": "Nội dung cập nhật và phạm vi thực hiện: Xác định rõ các mục thay đổi và hệ thống bị ảnh hưởng",
                 "pre-confirmation-3": "Đánh giá tác động: Đánh giá tác động đến con người, hoạt động, thời gian, môi trường và tài nguyên hệ thống",
                 "pre-confirmation-4": "Loại cập nhật (Bình thường / Khẩn cấp): Xác nhận là cập nhật bình thường hay khẩn cấp",
-                "pre-confirmation-5": "Khả năng hỗ trợ: Xác nhận đội ngũ hỗ trợ DEV, DBA, Infra có thể hỗ trợ thực hiện hay không",
+                    "pre-confirmation-5": "Khả năng hỗ trợ: Xác nhận đội ngũ hỗ trợ DEV, DBA, Infra, Service Desk có thể hỗ trợ thực hiện hay không",
                 "preparation-title": "2. Chuẩn bị Thông tin Cập nhật",
                 "preparation-desc": "Sau khi xác nhận, các thông tin sau phải được chuẩn bị trước và phục vụ làm cơ sở cho việc phê duyệt và thực hiện tiếp theo:",
                 "preparation-1": "Mô tả nội dung cập nhật: Mô tả các mục thay đổi và điểm chính",
@@ -692,7 +732,7 @@
                 "implementation-title": "4. Thực hiện Cập nhật",
                 "implementation-1": "Hoạt động cập nhật phải được <strong>thực hiện hoàn toàn theo nội dung đơn cập nhật ASE đã phê duyệt</strong>",
                 "implementation-2": "Điều kiện kỹ thuật, thứ tự thực hiện, liên kết lưu trữ dữ liệu cập nhật <strong>được DEV cung cấp trong khu vực thảo luận đơn cập nhật ASE</strong>",
-                "implementation-3": "Kết quả cập nhật phải được ghi nhận đầy đủ",
+                "implementation-3": "Người thực hiện cập nhật phiên bản phải ghi nhận đầy đủ kết quả cập nhật trong khu vực thảo luận đơn cập nhật ASE",
                 "verification-title": "5. Nghiệm thu Kết quả",
                 "verification-1": "Sau khi hoàn thành cập nhật, <strong>đội ngũ đề xuất thực hiện xác nhận hệ thống</strong>. Nếu hệ thống hoạt động bình thường, phải hoàn thành việc kết thúc đơn cập nhật.",
                 "closure-title": "6. Kết thúc",
@@ -702,7 +742,16 @@
                 "cmdb-process-ap": "<strong>AP</strong>: Được duy trì bởi DEV",
                 "cmdb-process-db": "<strong>DB</strong>: Được duy trì bởi DBA",
                 "cmdb-process-infra": "<strong>OS/Server/ Firewall/ Hypervisor</strong>: Được duy trì bởi Infra",
-                "cmdb-process-2": "Đội ngũ chịu trách nhiệm duy trì CI thực hiện xử lý và hoàn thành việc kết thúc đơn thay đổi cấu hình"
+                    "cmdb-process-2": "Đội ngũ chịu trách nhiệm duy trì CI thực hiện xử lý và hoàn thành việc kết thúc đơn thay đổi cấu hình",
+                    "executor-title": "Người thực hiện cập nhật phiên bản được chỉ định",
+                    "executor-app-title": "1. Ứng dụng:",
+                    "executor-app-1": "<strong>G2FW, Springboot, PB</strong>: Được thực hiện bởi DBA",
+                    "executor-app-2": "<strong>PCC Mobile Platform</strong>: Được thực hiện bởi Roger/Ezko",
+                    "executor-app-3": "<strong>SJS</strong>: Được thực hiện bởi Service Desk",
+                    "executor-db-title": "2. Cơ sở dữ liệu:",
+                    "executor-db-desc": "Thực hiện thống nhất bởi DBA",
+                    "executor-infra-title": "3. Cơ sở hạ tầng:",
+                    "executor-infra-desc": "Thực hiện thống nhất bởi Infra địa phương"
             }
         };
 
