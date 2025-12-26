@@ -187,7 +187,7 @@
         <ul>
             <li><a href="#" onclick="showSection('principles')" class="flex items-center transition-all duration-300 hover:bg-indigo-200 hover:text-indigo-900"><span class="mr-2">📋</span><span data-i18n="sidebar-principles">基本原則與適用範圍</span></a></li>
             <li><a href="#" onclick="showSection('overview')" class="active flex items-center transition-all duration-300 hover:bg-indigo-200 hover:text-indigo-900"><span class="mr-2">🔄</span><span data-i18n="sidebar-overview">版更作業整體流程</span></a></li>
-            <li><a href="change-flowchart.html" class="flex items-center transition-all duration-300 hover:bg-indigo-200 hover:text-indigo-900"><span class="mr-2">📊</span><span data-i18n="sidebar-flowchart">變更單操作流程圖</span></a></li>
+            <li><a href="#" onclick="showSection('flowchart')" class="flex items-center transition-all duration-300 hover:bg-indigo-200 hover:text-indigo-900"><span class="mr-2">📊</span><span data-i18n="sidebar-flowchart">變更單操作流程圖</span></a></li>
         </ul>
     </div>
 
@@ -420,6 +420,7 @@
                 <h2 class="text-2xl md:text-3xl font-bold text-slate-800 mb-4" data-i18n="verification-title">5.結果確認</h2>
                 <ul class="list-disc list-inside text-slate-700 space-y-2">
                     <li data-i18n="verification-1">版更完成後 <strong>由提出團隊進行系統確認</strong>, 若系統運作正常，須完成結案變更單</li>
+                    <li data-i18n="verification-2">提出團隊在進行 ASE 變更單結案前，必須先檢視並確認所有相關組態單已完成處理</li>
                 </ul>
             </section>
 
@@ -429,6 +430,47 @@
                 <ul class="list-disc list-inside text-slate-700 space-y-2">
                     <li data-i18n="closure-1"><strong>變更單 未結案，視為流程未完成</strong></li>
                 </ul>
+            </section>
+
+            <!-- 變更單操作流程圖 -->
+            <section id="flowchart" class="content-section mb-6 p-4 bg-indigo-50 rounded-xl shadow-lg border-l-4 border-indigo-400 transition-all duration-300 hover:scale-105 hover:shadow-xl">
+                <h2 class="text-2xl md:text-3xl font-bold text-slate-800 mb-4" data-i18n="flowchart-title">變更單操作流程圖（Change Flowchart）</h2>
+                <div class="mermaid">
+flowchart TD
+    %% ===== 主流程 =====
+    subgraph MAIN[主要流程]
+        S((開始)) --> A1[變更單已登記]
+        A1 --> B1[已分類]
+        B1 -->|一般變更| C1[評估中]
+        C1 --> D1[提交評估結果]
+        D1 --> E1{主管審核}
+        B1 -->|緊急變更| E1
+        E1 -->|退回| B1
+        E1 -->|通過| F1[變更計劃]
+        F1 --> G1[實施]
+        G1 --> K1{是否轉組態異動單}
+        K1 -->|否| H1{變更是否成功}
+        H1 -->|否| F1
+        H1 -->|是| I1[變更單已完成]
+        I1 --> J1[變更單已關閉]
+        J1 --> EEND((結束))
+    end
+    %% ===== 組態分支 =====
+    subgraph CMDB[組態分支]
+        CA1[組態異動單已登記] --> CB1[已分類]
+        CB1 --> CC1[異動準備]
+        CC1 --> CD1[提交異動結果]
+        CD1 --> CE1{主管確認}
+        CE1 -->|退回| CB1
+        CE1 -->|通過| CF1[異動 CMDB]
+        CF1 --> DB[(該區 CMDB)]
+        CF1 --> CG1[組態異動單已完成]
+        CG1 --> CH1[組態異動單已關閉]
+        CH1 --> CEND((結束))
+    end
+    %% ===== 跨子流程連線 =====
+    K1 -->|是| CA1
+                </div>
             </section>
         </div>
     </div>
@@ -547,6 +589,7 @@
                     "implementation-3": "版更執行者須完整記錄版更結果在ASE變更單的討論區",
                     "verification-title": "5.結果確認（Verification）",
                     "verification-1": "版更完成後 <strong>由提出團隊進行系統確認</strong>, 若系統運作正常，須完成結案變更單",
+                    "verification-2": "提出團隊在進行 ASE 變更單結案前，必須先檢視並確認所有相關組態單已完成處理",
                     "closure-title": "6.結案（Closure）",
                     "closure-1": "<strong>變更單 未結案，視為流程未完成</strong>",
                     "cmdb-process-title": "轉組態單處理流程說明",
@@ -641,6 +684,7 @@
                 "implementation-3": "The version update executor must fully record the version update results in the ASE change request discussion area",
                 "verification-title": "5. Result Verification",
                 "verification-1": "After version update completion, <strong>the proposing team performs system confirmation</strong>. If the system operates normally, the change request must be closed.",
+                "verification-2": "The proposing team must review and confirm that all related configuration requests have been completed before closing the ASE change request.",
                 "closure-title": "6. Closure",
                 "closure-1": "<strong>If change request is not closed, it is considered incomplete</strong>",
                 "cmdb-process-title": "CMDB Change Request Processing Flow Description",
@@ -735,6 +779,7 @@
                 "implementation-3": "Người thực hiện cập nhật phiên bản phải ghi nhận đầy đủ kết quả cập nhật trong khu vực thảo luận đơn cập nhật ASE",
                 "verification-title": "5. Nghiệm thu Kết quả",
                 "verification-1": "Sau khi hoàn thành cập nhật, <strong>đội ngũ đề xuất thực hiện xác nhận hệ thống</strong>. Nếu hệ thống hoạt động bình thường, phải hoàn thành việc kết thúc đơn cập nhật.",
+                "verification-2": "Đội ngũ đề xuất phải xem xét và xác nhận rằng tất cả các yêu cầu cấu hình liên quan đã được hoàn thành trước khi kết thúc đơn cập nhật ASE.",
                 "closure-title": "6. Kết thúc",
                 "closure-1": "<strong>Nếu đơn cập nhật không được kết thúc, được coi là chưa hoàn thành</strong>",
                 "cmdb-process-title": "Mô tả Quy trình Xử lý Đơn Thay đổi Cấu hình",
