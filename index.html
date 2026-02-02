@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="page-title">版更標準機制</title>
+    <!-- Include Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Include Mermaid for flowcharts -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({ startOnLoad: true });
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        /* Custom CSS for hand-drawn effect */
+        .hand-drawn-border {
+            border: 2px solid #1e293b;
+            position: relative;
+            z-index: 10;
+        }
+        .hand-drawn-border:after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 2px dashed #1e293b;
+            border-radius: 0.75rem;
+            transform: translate(2px, 2px);
+            z-index: 5;
+        }
+        /* Hand-drawn hatched background */
+        .llm-box-hatched {
+            background-color: #f1f5e1;
+            background-image: repeating-linear-gradient(
+                -45deg,
+                transparent,
+                transparent 5px,
+                #cbd5e1 5px,
+                #cbd5e1 6px
+            );
+        }
+        /* Arrow styles */
+        .arrow-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .arrow {
+            width: 80px;
+            height: 2px;
+            background-color: #1e293b;
+            position: relative;
+        }
+        .arrow:after {
+            content: '';
+            position: absolute;
+            right: -6px;
+            top: -5px;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 5px 0 5px 6px;
+            border-color: transparent transparent transparent #1e293b;
+        }
+        /* Flow arrows */
+        .flow-arrow {
+            width: 60px;
+            height: 2px;
+            background-color: #1e293b;
+            position: relative;
+            margin: 0 10px;
+        }
+        .flow-arrow:after {
+            content: '';
+            position: absolute;
+            right: -6px;
+            top: -5px;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 5px 0 5px 6px;
+            border-color: transparent transparent transparent #1e293b;
+        }
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 240px;
+            height: 100vh;
+            background-color: #f8fafc;
+            border-right: 1px solid #e2e8f0;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+        .sidebar ul {
+            list-style: none;
+            padding: 20px;
+        }
+        .sidebar li {
+            margin-bottom: 10px;
+        }
+        .sidebar a {
+            text-decoration: none;
+            color: #334155;
+            font-weight: 500;
+            display: block;
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: background-color 0.3s;
+        }
+        .sidebar a:hover {
+            background-color: #e2e8f0;
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .sidebar a.active {
+            background-color: #e2e8f0;
+            color: #1e293b;
+            border-left: 4px solid #3b82f6;
+        }
+        .flow-box {
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+            border: 2px solid transparent;
+        }
+        .flow-box.active {
+            background-color: #e2e8f0;
+            border-color: #3b82f6; /* a nice blue */
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+        }
+        .main-content {
+            margin-left: 240px;
+            padding: 15px;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+            .sidebar.hidden {
+                display: none !important;
+            }
+            .sidebar:not(.hidden) {
+                display: block;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 240px;
+                height: 100vh;
+                z-index: 1001;
+            }
+            .main-content {
+                margin-left: 0;
+            }
+        }
+        /* Hide Mermaid error messages */
+        .mermaid-error {
+            display: none !important;
+        }
+    </style>
+</head>
+<body class="bg-white text-slate-900">
+    <!-- Hamburger Menu Button for Mobile -->
+    <div class="fixed top-4 left-4 z-50 md:hidden">
+        <button id="hamburger-btn" class="bg-indigo-600 text-white p-2-rounded-md shadow-lg">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+        </button>
+    </div>
+    <!-- Sidebar -->
+    <div class="sidebar bg-gradient-to-b from-blue-100 via-indigo-100 to-purple-100 shadow-lg">
+        <h2 class="text-xl font-bold mb-4 px-4 text-indigo-800" data-i18n="sidebar-title">目錄</h2>
+        <ul>
+            <li><a href="#" onclick="showSection('principles')" class="flex items-center transition-all duration-300 hover:bg-indigo-200 hover:text-indigo-900"><span class="mr-2">📋</span><span data-i18n="sidebar-principles">基本說明</span></a></li>
+            <li><a href="#" onclick="showSection('overview')" class="active flex items-center transition-all duration-300 hover:bg-indigo-200 hover:text-indigo-900"><span class="mr-2">🔄</span><span data-i18n="sidebar-overview">版更作業整體流程</span></a></li>
+            <li><a href="change-flowchart.html" class="flex items-center transition-all duration-300 hover:bg-indigo-200 hover:text-indigo-900"><span class="mr-2">📊</span><span data-i18n="sidebar-flowchart">變更單操作流程圖</span></a></li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="container mx-auto p-2 md:p-4 lg:p-6">
+            <header class="text-center py-6 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 border-b-2 border-indigo-200 mb-6 shadow-lg rounded-lg mx-4 md:mx-8 lg:mx-12">
+                <div class="flex justify-end mb-4">
+                    <select id="language-selector" class="bg-white border border-indigo-300 rounded-md px-3 py-1 text-sm">
+                        <option value="zh" data-i18n="lang-zh">中文</option>
+                        <option value="en" data-i18n="lang-en">English</option>
+                        <option value="vi" data-i18n="lang-vi">Tiếng Việt</option>
+                    </select>
+                </div>
+                    <h1 class="text-2xl md:text-3xl lg:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-800 mb-4 animate-pulse" data-i18n="title">
+                    版更標準機制
+                </h1>
+                <p class="text-base md:text-lg text-indigo-700 font-medium" data-i18n="subtitle">
+                    適用環境：VN/MM/KH 正式區
+                </p>
+            </header>
+
+            <!-- 基本說明 -->
+            <section id="principles" class="content-section mb-6 p-4 bg-green-50 rounded-xl shadow-lg border-l-4 border-green-400 transition-all duration-300 hover:scale-105 hover:shadow-xl">
+                <h2 class="text-2xl md:text-3xl font-bold text-slate-800 mb-4" data-i18n="principles-title">基本說明</h2>
+                <div class="mb-6">
+                    <h3 class="text-2xl font-bold text-slate-800 mb-4" data-i18n="principles-purpose-title">目的</h3>
+                    <ul class="list-disc list-inside text-slate-700 space-y-2">
+                        <li data-i18n="principles-purpose-1">確保正式區穩定與正常運行</li>
+                    </ul>
+                </div>
+                <div class="mb-6">
+                    <h3 class="text-2xl font-bold text-slate-800 mb-4" data-i18n="principles-scope-title">適用範圍</h3>
+                    <p class="text-slate-700 leading-relaxed mb-4" data-i18n="principles-scope-desc">
+                        版更異動正式區時，適用本機制。
+                    </p>
+                </div>
+                <div class="mb-6">
+                    <h3 class="text-2xl font-bold text-slate-800 mb-4" data-i18n="principles-roles-title">角色說明</h3>
+                    <table class="min-w-full table-auto border-collapse border border-slate-300">
+                        <thead>
+                            <tr>
+                                <th class="border border-slate-300 px-4 py-2 bg-slate-100" data-i18n="principles-roles-role">角色</th>
+                                <th class="border border-slate-300 px-4 py-2 bg-slate-100" data-i18n="principles-roles-responsibilities">定義與主要職責</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="border border-slate-300 px-4 py-2 font-bold" data-i18n="principles-roles-proposing-team">提出團隊</td>
+                                <td class="border border-slate-300 px-4 py-2" data-i18n="principles-roles-proposing-team-desc">• 作為版更專案之負責團隊（PM），提出版更需求並負責整體流程之追蹤、驗收及結案作業。</td>
+                            </tr>
+                            <tr>
+                                <td class="border border-slate-300 px-4 py-2 font-bold" data-i18n="principles-roles-support-team">支援團隊</td>
+                                <td class="border border-slate-300 px-4 py-2" data-i18n="principles-roles-support-team-desc">• 協助 <strong>提出團隊</strong> 進行版更相關準備作業，或依核准內容執行實際版更作業。</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 版更作業整體流程 -->
+            <section id="overview" class="content-section active mb-6 p-4 bg-blue-50 rounded-xl shadow-lg border-l-4 border-blue-400 transition-all duration-300 hover:scale-105 hover:shadow-xl">
+                <h2 class="text-2xl md:text-3xl font-bold text-slate-800 mb-4" data-i18n="overview-title">版更作業整體流程</h2>
+                
+                <!-- Instruction Note -->
+                <div class="mb-6 p-4 bg-gradient-to-r from-blue-100 to-indigo-100 border-l-4 border-indigo-500 rounded-lg shadow-md">
+                    <div class="flex items-start">
+                        <svg class="w-6 h-6 text-indigo-600 mr-3 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                        </svg>
+                        <div>
+                            <p class="text-base font-semibold text-indigo-800 mb-1" data-i18n="overview-instruction-title">💡 使用說明</p>
+                            <p class="text-sm text-slate-700" data-i18n="overview-instruction-text">請點擊下方各個步驟方塊，查看該步驟的詳細內容說明。</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Visual Flow -->
+                <div class="flex items-center justify-center my-8">
+                    <div class="flex flex-col items-center p-4 bg-green-200 hover:bg-green-300 rounded-lg shadow-md w-24 text-center flow-box transition-all duration-300 hover:scale-105 cursor-pointer" onclick="showFlowContent('pre-confirmation')">
+                        <span class="text-lg font-semibold text-green-800" data-i18n="flow-1">1. 確認</span>
+                    </div>
+                    <div class="flow-arrow"></div>
+                    <div class="flex flex-col items-center p-4 bg-yellow-200 hover:bg-yellow-300 rounded-lg shadow-md w-24 text-center flow-box transition-all duration-300 hover:scale-105 cursor-pointer" onclick="showFlowContent('preparation')">
+                        <span class="text-lg font-semibold text-yellow-800" data-i18n="flow-2">2. 準備</span>
+                    </div>
+                    <div class="flow-arrow"></div>
+                    <div class="flex flex-col items-center p-4 bg-orange-200 hover:bg-orange-300 rounded-lg shadow-md w-32 text-center flow-box transition-all duration-300 hover:scale-105 cursor-pointer" onclick="showFlowContent('change-request')">
+                        <span class="text-lg font-semibold text-orange-800" data-i18n="flow-3">3. 變更單</span>
+                    </div>
+                    <div class="flow-arrow"></div>
+                    <div class="flex flex-col items-center p-4 bg-red-200 hover:bg-red-300 rounded-lg shadow-md w-24 text-center flow-box transition-all duration-300 hover:scale-105 cursor-pointer" onclick="showFlowContent('implementation')">
+                        <span class="text-lg font-semibold text-red-800" data-i18n="flow-4">4. 執行</span>
+                    </div>
+                    <div class="flow-arrow"></div>
+                    <div class="flex flex-col items-center p-4 bg-purple-200 hover:bg-purple-300 rounded-lg shadow-md w-24 text-center flow-box transition-all duration-300 hover:scale-105 cursor-pointer" onclick="showFlowContent('verification')">
+                        <span class="text-lg font-semibold text-purple-800" data-i18n="flow-5">5. 驗收</span>
+                    </div>
+                    <div class="flow-arrow"></div>
+                    <div class="flex flex-col items-center p-4 bg-blue-200 hover:bg-blue-300 rounded-lg shadow-md w-24 text-center flow-box transition-all duration-300 hover:scale-105 cursor-pointer" onclick="showFlowContent('closure')">
+                        <span class="text-lg font-semibold text-blue-800" data-i18n="flow-6">6. 結案</span>
+                    </div>
+                </div>
+                <div id="flow-content" class="mt-8 p-6 bg-slate-100 rounded-xl shadow-lg" style="display: none;"></div>
+            </section>
+
+
+            <!-- 1.版更前確認 -->
+            <section id="pre-confirmation" class="content-section mb-6 p-4 bg-yellow-50 rounded-xl shadow-lg border-l-4 border-yellow-400 transition-all duration-300 hover:scale-105 hover:shadow-xl">
+                <h2 class="text-2xl md:text-3xl font-bold text-slate-800 mb-4" data-i18n="pre-confirmation-title-h2">1.版更前確認</h2>
+                <p class="text-slate-700 leading-relaxed mb-4" data-i18n="pre-confirmation-desc-p">
+                    提出團隊與支援團隊 <strong>須完成相關事項之確認並取得共識</strong>，內容包括但不限於：
+                </p>
+                <ul class="list-disc list-inside text-slate-700 space-y-2">
+                    <li data-i18n="pre-confirmation-item-1">變更內容</li>
+                    <li data-i18n="pre-confirmation-item-2">影響範圍</li>
+                    <li data-i18n="pre-confirmation-item-3">特殊情境或例外狀況</li>
+                    <li data-i18n="pre-confirmation-item-4">支援團隊是否能配合</li>
+                </ul>
+            </section>
+
+            <!-- 2.版更資訊準備 -->
+            <section id="preparation" class="content-section mb-6 p-4 bg-orange-50 rounded-xl shadow-lg border-l-4 border-orange-400 transition-all duration-300 hover:scale-105 hover:shadow-xl">
+                <h2 class="text-2xl md:text-3xl font-bold text-slate-800 mb-4" data-i18n="preparation-title">2.版更資訊準備</h2>
+                <p class="text-slate-700 leading-relaxed mb-4" data-i18n="preparation-desc">
+                    確認完成後，各團隊將自行準備相關更新資料，並提供給<strong>提出團隊</strong>以進行開立變更申請單。若有資料未能即時提供，可於版更前補充。
+                </p>
+            </section>
+
+            <!-- 3.變更單開立與核准 -->
+            <section id="change-request" class="content-section mb-6 p-4 bg-red-50 rounded-xl shadow-lg border-l-4 border-red-400 transition-all duration-300 hover:scale-105 hover:shadow-xl">
+                <h2 class="text-2xl md:text-3xl font-bold text-slate-800 mb-4" data-i18n="change-request-title">3.變更單開立與核准</h2>
+                <div class="mb-6">
+                    <ul class="list-disc list-inside text-slate-700 space-y-2 mb-4">
+                        <li data-i18n="change-request-creation">由提出團隊於 <strong>ASE 系統建立變更單</strong></li>
+                    </ul>
+                </div>
+                <div class="mb-6">
+                    <h3 class="text-2xl font-bold text-slate-800 mb-4" data-i18n="change-request-spec-title">變更單填寫規範</h3>
+                    <p class="text-slate-700 leading-relaxed mb-4" data-i18n="change-request-spec-title-format">
+                        <strong>標題格式：</strong> 變更時間 (MM/DD hh:mm) + 系統名稱
+                    </p>
+                    <p class="text-slate-700 leading-relaxed mb-4" data-i18n="change-request-spec-content-desc">
+                        <strong>內容說明：</strong>
+                    </p>
+                    <table class="min-w-full table-auto border-collapse border border-slate-300 mb-4">
+                        <thead>
+                            <tr>
+                                <th class="border border-slate-300 px-4 py-2 bg-slate-100" data-i18n="change-request-table-item">項目</th>
+                                <th class="border border-slate-300 px-4 py-2 bg-slate-100" data-i18n="change-request-table-desc">說明</th>
+                                <th class="border border-slate-300 px-4 py-2 bg-slate-100" data-i18n="change-request-table-sw">軟體類</th>
+                                <th class="border border-slate-300 px-4 py-2 bg-slate-100" data-i18n="change-request-table-hw">硬體類</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="border border-slate-300 px-4 py-2"><strong data-i18n="change-request-table-item1-title">1. 系統名稱</strong></td>
+                                <td class="border border-slate-300 px-4 py-2" data-i18n="change-request-table-item1-desc">請填寫需變更的系統名稱</td>
+                                <td class="border border-slate-300 px-4 py-2 text-center">V</td>
+                                <td class="border border-slate-300 px-4 py-2 text-center">V</td>
+                            </tr>
+                            <tr>
+                                <td class="border border-slate-300 px-4 py-2"><strong data-i18n="change-request-table-item2-title">2. 影響範圍</strong></td>
+                                <td class="border border-slate-300 px-4 py-2" data-i18n="change-request-table-item2-desc">請填寫影響範圍：國家、事業部、區域、工廠…</td>
+                                <td class="border border-slate-300 px-4 py-2 text-center">V</td>
+                                <td class="border border-slate-300 px-4 py-2 text-center">V</td>
+                            </tr>
+                            <tr>
+                                <td class="border border-slate-300 px-4 py-2"><strong data-i18n="change-request-table-item3-title">3. 上版內容</strong></td>
+                                <td class="border border-slate-300 px-4 py-2" data-i18n="change-request-table-item3-desc">請描述變更的內容<br><strong>備註：</strong> 針對資料修改／系統調整需求，內容必須提供 ASE 單號與單據連結</td>
+                                <td class="border border-slate-300 px-4 py-2 text-center">V</td>
+                                <td class="border border-slate-300 px-4 py-2 text-center">V</td>
+                            </tr>
+                            <tr>
+                                <td class="border border-slate-300 px-4 py-2"><strong data-i18n="change-request-table-item4-title">4. 特殊事項</strong></td>
+                                <td class="border border-slate-300 px-4 py-2" data-i18n="change-request-table-item4-desc">例如：<br>- 是否需 DBA 於更新前備份<br>- 預計停機時間<br>- 其他注意事項</td>
+                                <td class="border border-slate-300 px-4 py-2 text-center">V</td>
+                                <td class="border border-slate-300 px-4 py-2 text-center">V</td>
+                            </tr>
+                            <tr>
+                                <td class="border border-slate-300 px-4 py-2"><strong data-i18n="change-request-table-item5-title">5. 轉組態異動單（CMDB）</strong></td>
+                                <td class="border border-slate-300 px-4 py-2" data-i18n="change-request-table-item5-desc">請填寫 Y / N，若需修改 CMDB，請填 <strong>Y</strong></td>
+                                <td class="border border-slate-300 px-4 py-2 text-center">V</td>
+                                <td class="border border-slate-300 px-4 py-2 text-center">V</td>
+                            </tr>
+                            <tr>
+                                <td class="border border-slate-300 px-4 py-2"><strong data-i18n="change-request-table-item6-title">6. 測試報告，版更步驟</strong></td>
+                                <td class="border border-slate-300 px-4 py-2" data-i18n="change-request-table-item6-desc">請說明資料是以附件提供，或由哪位同仁於 ASE 討論區提供。</td>
+                                <td class="border border-slate-300 px-4 py-2 text-center">V</td>
+                                <td class="border border-slate-300 px-4 py-2 text-center">V</td>
+                            </tr>
+                            <tr>
+                                <td class="border border-slate-300 px-4 py-2"><strong data-i18n="change-request-table-attach-title">需提供附件</strong></td>
+                                <td class="border border-slate-300 px-4 py-2" data-i18n="change-request-table-attach-desc">請依變更類型提供相關文件</td>
+                                <td class="border border-slate-300 px-4 py-2" data-i18n="change-request-table-attach-sw">1. <a href="System name_整合測試.xls" class="text-blue-600 hover:underline" download>測試報告文件</a> <br>2. <a href="版更步驟說明 Hướng dẫn các bước cập nhật phiên bản.xlsx" class="text-blue-600 hover:underline" download>版更步驟說明</a></td>
+                                <td class="border border-slate-300 px-4 py-2" data-i18n="change-request-table-attach-hw">1. <a href="PCG-0402-ISMS-T05 資訊機房變更申請單V1.2.odt" class="text-blue-600 hover:underline" download>PCG-0402-ISMS-T05 資訊機房變更申請單</a> <br>2. <a href="版更步驟說明 Hướng dẫn các bước cập nhật phiên bản.xlsx" class="text-blue-600 hover:underline" download>版更步驟說明</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="text-2xl font-bold text-slate-800 mb-4" data-i18n="change-type-title">變更類型說明</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-white p-6 rounded-lg shadow-md">
+                            <h4 class="text-xl font-bold text-blue-600 mb-2" data-i18n="change-type-normal-title">一般變更 Normal（提前 3 天開立及送審）</h4>
+                            <ul class="list-disc list-inside text-slate-700 space-y-2">
+                                <li data-i18n="change-type-normal-1">依計畫執行</li>
+                            </ul>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow-md">
+                            <h4 class="text-xl font-bold text-red-600 mb-2" data-i18n="change-type-emergency-title">緊急變更 Emergency（可當天開立及執行）</h4>
+                            <ul class="list-disc list-inside text-slate-700 space-y-2">
+                                <li data-i18n="change-type-emergency-1">非計畫執行</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-bold text-slate-800 mb-4" data-i18n="approval-title">變更單簽核流程（Approval）</h3>
+                    <p class="text-slate-700 leading-relaxed mb-4" data-i18n="approval-sw-type">
+                        <strong>SW 類型：</strong>
+                    </p>
+                    <p class="text-slate-700 leading-relaxed mb-4" data-i18n="approval-sw-flow">
+                        提出團隊申請者 → 包版團隊主管 (限VN負責包版之系統) → 提出團隊主管 → IT 部門主管
+                    </p>
+                    <p class="text-slate-700 leading-relaxed mb-4" data-i18n="approval-hw-type">
+                        <strong>HW 類型：</strong>
+                    </p>
+                    <p class="text-slate-700 leading-relaxed mb-4" data-i18n="approval-hw-flow">
+                        提出團隊申請者 → 提出團隊主管 → 越柬緬Infra主管 → IT 部門主管
+                    </p>
+
+                    <h4 class="text-xl font-bold text-slate-800 mb-2" data-i18n="approval-exception-title">情況特殊說明（例外處理）</h4>
+                    <p class="text-slate-700 leading-relaxed mb-4" data-i18n="approval-exception-desc">
+                        如果版更前無法取得核准的變更單，且評估必需版更。可使用例外確認流程，供版更人員取得版更依據。
+                    </p>
+                    <ol class="list-decimal list-inside text-slate-700 space-y-2 mb-4">
+                        <li data-i18n="approval-exception-1">由提出團隊主管在討論區備註，同意版更。</li>
+                        <li data-i18n="approval-exception-2">若提出團隊主管也無法備註，請聯絡客服主管。由客服主管在討論區註解，知悉此申請。</li>
+                    </ol>
+                    <div class="mb-6">
+                        <h3 class="text-2xl font-bold text-slate-800 mb-4 mt-4" data-i18n="cmdb-process-title">轉組態單處理流程說明</h3>
+                        <ul class="list-disc list-inside text-slate-700 space-y-2 mb-4">
+                            <li data-i18n="cmdb-process-1">提出團隊依 CI 類型分派組態單至對應負責團隊</li>
+                            <li data-i18n="cmdb-process-2">負責維護 CI 的團隊進行處理，並完成組態單結案</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 4.版更執行 -->
+            <section id="implementation" class="content-section mb-6 p-4 bg-purple-50 rounded-xl shadow-lg border-l-4 border-purple-400 transition-all duration-300 hover:scale-105 hover:shadow-xl">
+                <h2 class="text-2xl md:text-3xl font-bold text-slate-800 mb-4" data-i18n="implementation-title">4.版更執行</h2>
+                <p class="text-slate-700 leading-relaxed mb-4" data-i18n="implementation-desc-1">
+                    版更作業須 <strong>完全依照 ASE變更單核准內容執行</strong>
+                </p>
+                <p class="text-slate-700 leading-relaxed mb-4" data-i18n="implementation-desc-2">
+                    版更執行者須完整記錄版更結果在ASE變更單的討論區
+                </p>
+                <div class="mb-6">
+                    <h3 class="text-2xl font-bold text-slate-800 mb-4" data-i18n="implementation-executor-title">指定版更執行者（Executor）</h3>
+                    <table class="min-w-full table-auto border-collapse border border-slate-300">
+                        <thead>
+                            <tr>
+                                <th class="border border-slate-300 px-4 py-2 bg-slate-100" data-i18n="implementation-executor-table-category">版更類別</th>
+                                <th class="border border-slate-300 px-4 py-2 bg-slate-100" data-i18n="implementation-executor-table-executor">執行者</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="border border-slate-300 px-4 py-2" data-i18n="implementation-executor-table-row1-category">系統軟體相關的含 AP、DB、JOB、ESB…等</td>
+                                <td class="border border-slate-300 px-4 py-2" data-i18n="implementation-executor-table-row1-executor">DBA</td>
+                            </tr>
+                            <tr>
+                                <td class="border border-slate-300 px-4 py-2" data-i18n="implementation-executor-table-row2-category">硬體相關的含 Firewall, Server, UPS…等</td>
+                                <td class="border border-slate-300 px-4 py-2" data-i18n="implementation-executor-table-row2-executor">當地 Infra 負責團隊</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 5.驗收版更結果 -->
+            <section id="verification" class="content-section mb-6 p-4 bg-teal-50 rounded-xl shadow-lg border-l-4 border-teal-400 transition-all duration-300 hover:scale-105 hover:shadow-xl">
+                <h2 class="text-2xl md:text-3xl font-bold text-slate-800 mb-4" data-i18n="verification-title">5.驗收版更結果</h2>
+                <p class="text-slate-700 leading-relaxed mb-4" data-i18n="verification-desc">
+                    版更完成後, 由 <strong>提出團隊</strong> 進行驗收版更結果
+                </p>
+            </section>
+
+            <!-- 6.結案 -->
+            <section id="closure" class="content-section mb-6 p-4 bg-blue-50 rounded-xl shadow-lg border-l-4 border-blue-400 transition-all duration-300 hover:scale-105 hover:shadow-xl">
+                <h2 class="text-2xl md:text-3xl font-bold text-slate-800 mb-4" data-i18n="closure-title">6.結案</h2>
+                <p class="text-slate-700 leading-relaxed mb-4" data-i18n="closure-desc">
+                    由 <strong>提出團隊</strong> 將變更單按 <strong>完成</strong> -> 結束版更流程
+                </p>
+            </section>
+
+            <!-- 變更單操作流程圖 -->
+            <section id="flowchart" class="content-section mb-6 p-4 bg-indigo-50 rounded-xl shadow-lg border-l-4 border-indigo-400 transition-all duration-300 hover:scale-105 hover:shadow-xl">
+                <h2 class="text-2xl md:text-3xl font-bold text-slate-800 mb-4" data-i18n="flowchart-title">變更單操作流程圖（Change Flowchart）</h2>
+                <div class="mermaid">
+flowchart TD
+    %% ===== 主流程 =====
+    subgraph MAIN[主要流程]
+        S((開始)) --> A1[變更單已登記]
+        A1 --> B1[已分類]
+        B1 -->|一般變更| C1[評估中]
+        C1 --> D1[提交評估結果]
+        D1 --> E1{主管審核}
+        B1 -->|緊急變更| E1
+        E1 -->|退回| B1
+        E1 -->|通過| F1[變更計劃]
+        F1 --> G1[實施]
+        G1 --> K1{是否轉組態異動單}
+        K1 -->|否| H1{變更是否成功}
+        H1 -->|否| F1
+        H1 -->|是| I1[變更單已完成]
+        I1 --> J1[變更單已關閉]
+        J1 --> EEND((結束))
+    end
+    %% ===== 組態分支 =====
+    subgraph CMDB[組態分支]
+        CA1[組態異動單已登記] --> CB1[已分類]
+        CB1 --> CC1[異動準備]
+        CC1 --> CD1[提交異動結果]
+        CD1 --> CE1{主管確認}
+        CE1 -->|退回| CB1
+        CE1 -->|通過| CF1[異動 CMDB]
+        CF1 --> DB[(該區 CMDB)]
+        CF1 --> CG1[組態異動單已完成]
+        CG1 --> CH1[組態異動單已關閉]
+        CH1 --> CEND((結束))
+    end
+    %% ===== 跨子流程連線 =====
+    K1 -->|是| CA1
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            // Show selected section
+            document.getElementById(sectionId).classList.add('active');
+            // Update sidebar active
+            document.querySelectorAll('.sidebar a').forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('onclick') === `showSection('${sectionId}')`) {
+                    link.classList.add('active');
+                }
+            });
+        }
+        function showFlowContent(sectionId) {
+            const contentDiv = document.getElementById('flow-content');
+            const section = document.getElementById(sectionId);
+            if (section) {
+                const content = section.innerHTML;
+                contentDiv.innerHTML = content;
+                contentDiv.style.display = 'block';
+            }
+            // Update active
+            document.querySelectorAll('.flow-box').forEach(box => {
+                box.classList.remove('active');
+            });
+            if (event.target.closest('.flow-box')) {
+                event.target.closest('.flow-box').classList.add('active');
+            }
+        }
+        // Hamburger menu toggle
+        document.getElementById('hamburger-btn').addEventListener('click', function() {
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.classList.toggle('hidden');
+        });
+
+        // Internationalization
+        const translations = {
+            zh: {
+                "page-title": "版更標準機制",
+                "lang-zh": "中文",
+                "lang-en": "English",
+                "lang-vi": "Tiếng Việt",
+                "title": "版更標準機制",
+                "subtitle": "適用環境：VN/MM/KH 正式區",
+                "sidebar-title": "目錄",
+                "sidebar-principles": "基本說明",
+                "sidebar-overview": "版更作業整體流程",
+                "sidebar-flowchart": "變更單操作流程圖",
+                "principles-title": "基本說明",
+                "principles-purpose-title": "目的",
+                "principles-purpose-1": "確保正式區穩定與正常運行",
+                "principles-scope-title": "適用範圍",
+                "principles-scope-desc": "版更異動正式區時，適用本機制。",
+                "principles-roles-title": "角色說明",
+                "principles-roles-role": "角色",
+                "principles-roles-responsibilities": "定義與主要職責",
+                "principles-roles-proposing-team": "提出團隊",
+                "principles-roles-proposing-team-desc": "• 作為版更專案之負責團隊（PM），提出版更需求並負責整體流程之追蹤、驗收及結案作業。",
+                "principles-roles-support-team": "支援團隊",
+                "principles-roles-support-team-desc": "• 協助 <strong>提出團隊</strong> 進行版更相關準備作業，或依核准內容執行實際版更作業。",
+                "overview-title": "版更作業整體流程",
+                "overview-instruction-title": "💡 使用說明",
+                "overview-instruction-text": "請點擊下方各個步驟方塊，查看該步驟的詳細內容說明。",
+                "flow-1": "1. 確認",
+                "flow-2": "2. 準備",
+                "flow-3": "3. 變更單",
+                "flow-4": "4. 執行",
+                "flow-5": "5. 驗收",
+                "flow-6": "6. 結案",
+                "pre-confirmation-title-h2": "1.版更前確認",
+                "pre-confirmation-desc-p": "提出團隊與支援團隊 <strong>須完成相關事項之確認並取得共識</strong>，內容包括但不限於：",
+                "pre-confirmation-item-1": "變更內容",
+                "pre-confirmation-item-2": "影響範圍",
+                "pre-confirmation-item-3": "特殊情境或例外狀況",
+                "pre-confirmation-item-4": "支援團隊是否能配合",
+                "preparation-title": "2.版更資訊準備",
+                "preparation-desc": "確認完成後，各團隊將自行準備相關更新資料，並提供給<strong>提出團隊</strong>以進行開立變更申請單。若有資料未能即時提供，可於版更前補充。",
+                "change-request-title": "3.變更單開立與核准",
+                "change-request-creation": "由提出團隊於 <strong>ASE 系統建立變更單</strong>",
+                "change-request-spec-title": "變更單填寫規範",
+                "change-request-spec-title-format": "<strong>標題格式：</strong> 變更時間 (MM/DD hh:mm) + 系統名稱",
+                "change-request-spec-content-desc": "<strong>內容說明：</strong>",
+                "change-request-table-item": "項目",
+                "change-request-table-desc": "說明",
+                "change-request-table-sw": "軟體類",
+                "change-request-table-hw": "硬體類",
+                "change-request-table-item1-title": "1. 系統名稱",
+                "change-request-table-item1-desc": "請填寫需變更的系統名稱",
+                "change-request-table-item2-title": "2. 影響範圍",
+                "change-request-table-item2-desc": "請填寫影響範圍：國家、事業部、區域、工廠…",
+                "change-request-table-item3-title": "3. 上版內容",
+                "change-request-table-item3-desc": "請描述變更的內容<br><strong>備註：</strong> 針對資料修改／系統調整需求，內容必須提供 ASE 單號與單據連結",
+                "change-request-table-item4-title": "4. 特殊事項",
+                "change-request-table-item4-desc": "例如：<br>- 是否需 DBA 於更新前備份<br>- 預計停機時間<br>- 其他注意事項",
+                "change-request-table-item5-title": "5. 轉組態異動單（CMDB）",
+                "change-request-table-item5-desc": "請填寫 Y / N，若需修改 CMDB，請填 <strong>Y</strong>",
+                "change-request-table-item6-title": "6. 測試報告，版更步驟",
+                "change-request-table-item6-desc": "請說明資料是以附件提供，或由哪位同仁於 ASE 討論區提供。",
+                "change-request-table-attach-title": "需提供附件",
+                "change-request-table-attach-desc": "請依變更類型提供相關文件",
+                "change-request-table-attach-sw": "1. <a href=\"System name_整合測試.xls\" class=\"text-blue-600 hover:underline\" download>測試報告文件</a> <br>2. <a href=\"版更步驟說明 Hướng dẫn các bước cập nhật phiên bản.xlsx\" class=\"text-blue-600 hover:underline\" download>版更步驟說明</a>",
+                "change-request-table-attach-hw": "1. <a href=\"PCG-0402-ISMS-T05 資訊機房變更申請單V1.2.odt\" class=\"text-blue-600 hover:underline\" download>PCG-0402-ISMS-T05 資訊機房變更申請單</a> <br>2. <a href=\"版更步驟說明 Hướng dẫn các bước cập nhật phiên bản.xlsx\" class=\"text-blue-600 hover:underline\" download>版更步驟說明</a>",
+                "change-type-title": "變更類型說明",
+                "change-type-normal-title": "一般變更 Normal（提前 3 天開立及送審）",
+                "change-type-normal-1": "依計畫執行",
+                "change-type-emergency-title": "緊急變更 Emergency（可當天開立及執行）",
+                "change-type-emergency-1": "非計畫執行",
+                "approval-title": "變更單簽核流程（Approval）",
+                "approval-sw-type": "<strong>SW 類型：</strong>",
+                "approval-sw-flow": "提出團隊申請者 → 包版團隊主管 (限VN負責包版之系統) → 提出團隊主管 → IT 部門主管",
+                "approval-hw-type": "<strong>HW 類型：</strong>",
+                "approval-hw-flow": "提出團隊申請者 → 提出團隊主管 → 越柬緬Infra主管 → IT 部門主管",
+                "approval-exception-title": "情況特殊說明（例外處理）",
+                "approval-exception-desc": "如果版更前無法取得核准的變更單，且評估必需版更。可使用例外確認流程，供版更人員取得版更依據。",
+                "approval-exception-1": "由提出團隊主管在討論區備註，同意版更。",
+                "approval-exception-2": "若提出團隊主管也無法備註，請聯絡客服主管。由客服主管在討論區註解，知悉此申請。",
+                "cmdb-process-title": "轉組態單處理流程說明",
+                "cmdb-process-1": "提出團隊依 CI 類型分派組態單至對應負責團隊",
+                "cmdb-process-2": "負責維護 CI 的團隊進行處理，並完成組態單結案",
+                "implementation-title": "4.版更執行",
+                "implementation-desc-1": "版更作業須 <strong>完全依照 ASE變更單核准內容執行</strong>",
+                "implementation-desc-2": "版更執行者須完整記錄版更結果在ASE變更單的討論區",
+                "implementation-executor-title": "指定版更執行者（Executor）",
+                "implementation-executor-table-category": "版更類別",
+                "implementation-executor-table-executor": "執行者",
+                "implementation-executor-table-row1-category": "系統軟體相關的含 AP、DB、JOB、ESB…等",
+                "implementation-executor-table-row1-executor": "DBA",
+                "implementation-executor-table-row2-category": "硬體相關的含 Firewall, Server, UPS…等",
+                "implementation-executor-table-row2-executor": "當地 Infra 負責團隊",
+                "verification-title": "5.驗收版更結果",
+                "verification-desc": "版更完成後, 由 <strong>提出團隊</strong> 進行驗收版更結果",
+                "closure-title": "6.結案",
+                "closure-desc": "由 <strong>提出團隊</strong> 將變更單按 <strong>完成</strong> -> 結束版更流程",
+                "flowchart-title": "變更單操作流程圖（Change Flowchart）"
+            },
+            en: {
+                "page-title": "Version Update Standard Mechanism",
+                "lang-zh": "中文",
+                "lang-en": "English",
+                "lang-vi": "Tiếng Việt",
+                "title": "Version Update Standard Mechanism",
+                "subtitle": "Applicable Environment: VN/MM/KH Production Area",
+                "sidebar-title": "Table of Contents",
+                "sidebar-principles": "Basic Description",
+                "sidebar-overview": "Overall Version Update Process",
+                "sidebar-flowchart": "Change Request Operation Flowchart",
+                "principles-title": "Basic Description",
+                "principles-purpose-title": "Purpose",
+                "principles-purpose-1": "Ensure the stability and normal operation of the production environment.",
+                "principles-scope-title": "Scope",
+                "principles-scope-desc": "This mechanism applies when making changes to the production environment.",
+                "principles-roles-title": "Role Description",
+                "principles-roles-role": "Role",
+                "principles-roles-responsibilities": "Definition and Main Responsibilities",
+                "principles-roles-proposing-team": "Proposing Team",
+                "principles-roles-proposing-team-desc": "• Acts as the responsible team (PM) for the version update project, proposes update requirements, and is responsible for tracking the entire process, acceptance, and closure.",
+                "principles-roles-support-team": "Support Team",
+                "principles-roles-support-team-desc": "• Assists the <strong>Proposing Team</strong> in preparing for the version update, or executes the actual update based on the approved content.",
+                "overview-title": "Overall Version Update Process",
+                "overview-instruction-title": "💡 Instructions",
+                "overview-instruction-text": "Please click on each step box below to view detailed information for that step.",
+                "flow-1": "1. Confirm",
+                "flow-2": "2. Prepare",
+                "flow-3": "3. Change Request",
+                "flow-4": "4. Implement",
+                "flow-5": "5. Verify",
+                "flow-6": "6. Close",
+                "pre-confirmation-title-h2": "1. Pre-Update Confirmation",
+                "pre-confirmation-desc-p": "The proposing team and support team <strong>must complete the confirmation of relevant matters and reach a consensus</strong>, including but not limited to:",
+                "pre-confirmation-item-1": "Content of change",
+                "pre-confirmation-item-2": "Scope of impact",
+                "pre-confirmation-item-3": "Special scenarios or exceptions",
+                "pre-confirmation-item-4": "Feasibility of support team cooperation",
+                "preparation-title": "2. Preparation of Version Update Information",
+                "preparation-desc": "After confirmation, each team will prepare the relevant update materials and provide them to the <strong>proposing team</strong> to create a change request. If some information cannot be provided immediately, it can be supplemented before the version update.",
+                "change-request-title": "3. Change Request Creation and Approval",
+                "change-request-creation": "The proposing team creates a <strong>change request in the ASE system</strong>",
+                "change-request-spec-title": "Change Request Form Guidelines",
+                "change-request-spec-title-format": "<strong>Title Format:</strong> Change Time (MM/DD hh:mm) + System Name",
+                "change-request-spec-content-desc": "<strong>Content Description:</strong>",
+                "change-request-table-item": "Item",
+                "change-request-table-desc": "Description",
+                "change-request-table-sw": "Software",
+                "change-request-table-hw": "Hardware",
+                "change-request-table-item1-title": "1. System Name",
+                "change-request-table-item1-desc": "Please enter the name of the system to be changed",
+                "change-request-table-item2-title": "2. Scope of Impact",
+                "change-request-table-item2-desc": "Please enter the scope of impact: Country, Business Unit, Region, Factory...",
+                "change-request-table-item3-title": "3. Update Content",
+                "change-request-table-item3-desc": "Please describe the content of the change<br><strong>Note:</strong> For data modification/system adjustment requests, the content must provide the ASE ticket number and link.",
+                "change-request-table-item4-title": "4. Special Matters",
+                "change-request-table-item4-desc": "For example:<br>- Does DBA need to back up before the update?<br>- Estimated downtime<br>- Other notes",
+                "change-request-table-item5-title": "5. Convert to Configuration Change Request (CMDB)",
+                "change-request-table-item5-desc": "Please enter Y / N. If you need to modify the CMDB, enter <strong>Y</strong>.",
+                "change-request-table-item6-title": "6. Test Report, Update Steps",
+                "change-request-table-item6-desc": "Please specify if the data is provided as an attachment or by which colleague in the ASE discussion forum.",
+                "change-request-table-attach-title": "Attachments to be Provided",
+                "change-request-table-attach-desc": "Please provide relevant documents according to the change type.",
+                "change-request-table-attach-sw": "1. <a href=\"System name_整合測試.xls\" class=\"text-blue-600 hover:underline\" download>Test Report Document</a><br>2. <a href=\"版更步驟說明 Hướng dẫn các bước cập nhật phiên bản.xlsx\" class=\"text-blue-600 hover:underline\" download>Version Update Steps Description</a>",
+                "change-request-table-attach-hw": "1. <a href=\"PCG-0402-ISMS-T05 資訊機房變更申請單V1.2.odt\" class=\"text-blue-600 hover:underline\" download>PCG-0402-ISMS-T05 Information Room Change Request Form</a><br>2. <a href=\"版更步驟說明 Hướng dẫn các bước cập nhật phiên bản.xlsx\" class=\"text-blue-600 hover:underline\" download>Version Update Steps Description</a>",
+                "change-type-title": "Change Type Description",
+                "change-type-normal-title": "Normal Change (Create and submit 3 days in advance)",
+                "change-type-normal-1": "Execute as planned",
+                "change-type-emergency-title": "Emergency Change (Can be created and executed on the same day)",
+                "change-type-emergency-1": "Unplanned execution",
+                "approval-title": "Change Request Approval Flow (Approval)",
+                "approval-sw-type": "<strong>SW Type:</strong>",
+                "approval-sw-flow": "Proposing Team Applicant → Packaging Team Supervisor (only for VN-managed packaging systems) → Proposing Team Supervisor → IT Department Head",
+                "approval-hw-type": "<strong>HW Type:</strong>",
+                "approval-hw-flow": "Proposing Team Applicant → Proposing Team Supervisor → VN/KH/MM Infra Supervisor → IT Department Head",
+                "approval-exception-title": "Special Case Description (Exception Handling)",
+                "approval-exception-desc": "If the approved change request cannot be obtained before the version update, and it is assessed that the update must proceed, an exception confirmation process can be used to provide a basis for the update personnel.",
+                "approval-exception-1": "The proposing team supervisor makes a note in the discussion area, agreeing to the version update.",
+                "approval-exception-2": "If the proposing team supervisor is also unable to make a note, please contact the customer service supervisor. The customer service supervisor will make a note in the discussion area, acknowledging this request.",
+                "cmdb-process-title": "Configuration Change Request Processing Flow Description",
+                "cmdb-process-1": "The proposing team assigns the configuration request to the corresponding responsible team based on the CI type.",
+                "cmdb-process-2": "The team responsible for maintaining the CI handles it and closes the configuration request.",
+                "implementation-title": "4. Implementation",
+                "implementation-desc-1": "The version update must be <strong>executed strictly according to the approved content of the ASE change request</strong>.",
+                "implementation-desc-2": "The implementer must fully record the update results in the discussion area of the ASE change request.",
+                "implementation-executor-title": "Designated Executor",
+                "implementation-executor-table-category": "Update Type",
+                "implementation-executor-table-executor": "Executor",
+                "implementation-executor-table-row1-category": "System software related including AP, DB, JOB, ESB, etc.",
+                "implementation-executor-table-row1-executor": "DBA",
+                "implementation-executor-table-row2-category": "Hardware related including Firewall, Server, UPS, etc.",
+                "implementation-executor-table-row2-executor": "Local Infra Team",
+                "verification-title": "5. Acceptance of Version Update Results",
+                "verification-desc": "After the update is complete, the <strong>proposing team</strong> will verify the results.",
+                "closure-title": "6. Closure",
+                "closure-desc": "The <strong>proposing team</strong> marks the change request as <strong>complete</strong> to end the update process.",
+                "flowchart-title": "Change Request Operation Flowchart"
+            },
+            vi: {
+                "page-title": "Cơ chế Tiêu chuẩn Cập nhật Phiên bản",
+                "lang-zh": "中文",
+                "lang-en": "English",
+                "lang-vi": "Tiếng Việt",
+                "title": "Cơ chế Tiêu chuẩn Cập nhật Phiên bản",
+                "subtitle": "Môi trường Áp dụng: Khu vực Chính thức VN/MM/KH",
+                "sidebar-title": "Mục lục",
+                "sidebar-principles": "Giải thích Cơ bản",
+                "sidebar-overview": "Quy trình Tổng thể Cập nhật Phiên bản",
+                "sidebar-flowchart": "Sơ đồ Quy trình Thao tác Đơn Thay đổi",
+                "principles-title": "Giải thích Cơ bản",
+                "principles-purpose-title": "Mục đích",
+                "principles-purpose-1": "Đảm bảo sự ổn định và hoạt động bình thường của khu vực chính thức.",
+                "principles-scope-title": "Phạm vi áp dụng",
+                "principles-scope-desc": "Khi thay đổi khu vực chính thức, cơ chế này sẽ được áp dụng.",
+                "principles-roles-title": "Giải thích vai trò",
+                "principles-roles-role": "Vai trò",
+                "principles-roles-responsibilities": "Định nghĩa và trách nhiệm chính",
+                "principles-roles-proposing-team": "Nhóm đề xuất",
+                "principles-roles-proposing-team-desc": "• Là nhóm chịu trách nhiệm (PM) cho dự án cập nhật phiên bản, đề xuất yêu cầu cập nhật và chịu trách nhiệm theo dõi toàn bộ quy trình, nghiệm thu và kết thúc dự án.",
+                "principles-roles-support-team": "Nhóm hỗ trợ",
+                "principles-roles-support-team-desc": "• Hỗ trợ <strong>Nhóm đề xuất</strong> chuẩn bị các công việc liên quan đến cập nhật phiên bản, hoặc thực hiện công việc cập nhật thực tế theo nội dung đã được phê duyệt.",
+                "overview-title": "Quy trình tổng thể cập nhật phiên bản",
+                "overview-instruction-title": "💡 Hướng dẫn sử dụng",
+                "overview-instruction-text": "Vui lòng nhấp vào từng ô bước bên dưới để xem nội dung chi tiết của bước đó.",
+                "flow-1": "1. Xác nhận",
+                "flow-2": "2. Chuẩn bị",
+                "flow-3": "3. Đơn thay đổi",
+                "flow-4": "4. Thực hiện",
+                "flow-5": "5. Nghiệm thu",
+                "flow-6": "6. Kết án",
+                "pre-confirmation-title-h2": "1. Xác nhận trước khi cập nhật phiên bản",
+                "pre-confirmation-desc-p": "Nhóm đề xuất và nhóm hỗ trợ <strong>phải hoàn tất việc xác nhận các vấn đề liên quan và đạt được sự đồng thuận</strong>, nội dung bao gồm nhưng không giới hạn ở:",
+                "pre-confirmation-item-1": "Nội dung thay đổi",
+                "pre-confirmation-item-2": "Phạm vi ảnh hưởng",
+                "pre-confirmation-item-3": "Tình huống đặc biệt hoặc trường hợp ngoại lệ",
+                "pre-confirmation-item-4": "Nhóm hỗ trợ có thể phối hợp hay không",
+                "preparation-title": "2. Chuẩn bị thông tin cập nhật phiên bản",
+                "preparation-desc": "Sau khi xác nhận hoàn tất, các nhóm sẽ tự chuẩn bị dữ liệu cập nhật liên quan và cung cấp cho <strong>nhóm đề xuất</strong> để tạo đơn xin thay đổi. Nếu có dữ liệu không thể cung cấp kịp thời, có thể bổ sung trước khi cập nhật.",
+                "change-request-title": "3. Tạo và phê duyệt đơn thay đổi",
+                "change-request-creation": "Do nhóm đề xuất tại <strong>hệ thống ASE tạo đơn thay đổi</strong>",
+                "change-request-spec-title": "Quy định điền đơn thay đổi",
+                "change-request-spec-title-format": "<strong>Định dạng tiêu đề:</strong> Thời gian thay đổi (MM/DD hh:mm) + Tên hệ thống",
+                "change-request-spec-content-desc": "<strong>Nội dung mô tả:</strong>",
+                "change-request-table-item": "Hạng mục",
+                "change-request-table-desc": "Mô tả",
+                "change-request-table-sw": "Phần mềm",
+                "change-request-table-hw": "Phần cứng",
+                "change-request-table-item1-title": "1. Tên hệ thống",
+                "change-request-table-item1-desc": "Vui lòng điền tên hệ thống cần thay đổi",
+                "change-request-table-item2-title": "2. Phạm vi ảnh hưởng",
+                "change-request-table-item2-desc": "Vui lòng điền phạm vi ảnh hưởng: quốc gia, bộ phận kinh doanh, khu vực, nhà máy...",
+                "change-request-table-item3-title": "3. Nội dung cập nhật",
+                "change-request-table-item3-desc": "Vui lòng mô tả nội dung thay đổi<br><strong>Ghi chú:</strong> Đối với các yêu cầu sửa đổi dữ liệu/điều chỉnh hệ thống, nội dung phải cung cấp số đơn ASE và liên kết đơn.",
+                "change-request-table-item4-title": "4. Các vấn đề đặc biệt",
+                "change-request-table-item4-desc": "Ví dụ:<br>- Có cần DBA sao lưu trước khi cập nhật không<br>- Thời gian ngừng hoạt động dự kiến<br>- Các lưu ý khác",
+                "change-request-table-item5-title": "5. Chuyển sang đơn thay đổi cấu hình (CMDB)",
+                "change-request-table-item5-desc": "Vui lòng điền Y / N, nếu cần sửa đổi CMDB, vui lòng điền <strong>Y</strong>",
+                "change-request-table-item6-title": "6. Báo cáo thử nghiệm, các bước cập nhật phiên bản",
+                "change-request-table-item6-desc": "Vui lòng cho biết dữ liệu được cung cấp dưới dạng tệp đính kèm hay do đồng nghiệp nào cung cấp trong khu vực thảo luận của ASE.",
+                "change-request-table-attach-title": "Cần cung cấp tệp đính kèm",
+                "change-request-table-attach-desc": "Vui lòng cung cấp các tài liệu liên quan theo loại thay đổi",
+                "change-request-table-attach-sw": "1. <a href=\"System name_整合測試.xls\" class=\"text-blue-600 hover:underline\" download>Tài liệu báo cáo thử nghiệm</a> <br>2. <a href=\"版更步驟說明 Hướng dẫn các bước cập nhật phiên bản.xlsx\" class=\"text-blue-600 hover:underline\" download>Hướng dẫn các bước cập nhật phiên bản</a>",
+                "change-request-table-attach-hw": "1. <a href=\"PCG-0402-ISMS-T05 資訊機房變更申請單V1.2.odt\" class=\"text-blue-600 hover:underline\" download>Đơn xin thay đổi phòng máy thông tin PCG-0402-ISMS-T05</a> <br>2. <a href=\"版更步驟說明 Hướng dẫn các bước cập nhật phiên bản.xlsx\" class=\"text-blue-600 hover:underline\" download>Hướng dẫn các bước cập nhật phiên bản</a>",
+                "change-type-title": "Giải thích loại thay đổi",
+                "change-type-normal-title": "Thay đổi thông thường Normal (tạo và gửi duyệt trước 3 ngày)",
+                "change-type-normal-1": "Thực hiện theo kế hoạch",
+                "change-type-emergency-title": "Thay đổi khẩn cấp Emergency (có thể tạo và thực hiện trong ngày)",
+                "change-type-emergency-1": "Thực hiện không theo kế hoạch",
+                "approval-title": "Quy trình ký duyệt đơn thay đổi (Approval)",
+                "approval-sw-type": "<strong>Loại SW:</strong>",
+                "approval-sw-flow": "Người nộp đơn của nhóm đề xuất → Chủ quản nhóm đóng gói phiên bản (chỉ áp dụng cho hệ thống do VN phụ trách đóng gói) → Chủ quản nhóm đề xuất → Chủ quản bộ phận IT",
+                "approval-hw-type": "<strong>Loại HW:</strong>",
+                "approval-hw-flow": "Người nộp đơn của nhóm đề xuất → Chủ quản nhóm đề xuất → Chủ quản Infra Việt Nam-Campuchia-Myanmar → Chủ quản bộ phận IT",
+                "approval-exception-title": "Giải thích tình huống đặc biệt (xử lý ngoại lệ)",
+                "approval-exception-desc": "Nếu đơn thay đổi không thể được phê duyệt trước khi cập nhật phiên bản, và đánh giá rằng cần phải cập nhật. Có thể sử dụng quy trình xác nhận ngoại lệ, để cung cấp cơ sở cho nhân viên cập nhật phiên bản.",
+                "approval-exception-1": "Chủ quản nhóm đề xuất ghi chú trong khu vực thảo luận, đồng ý cập nhật phiên bản.",
+                "approval-exception-2": "Nếu chủ quản nhóm đề xuất cũng không thể ghi chú, vui lòng liên hệ chủ quản chăm sóc khách hàng. Chủ quản chăm sóc khách hàng sẽ ghi chú trong khu vực thảo luận, biết về yêu cầu này.",
+                "cmdb-process-title": "Hướng dẫn quy trình xử lý đơn chuyển đổi cấu hình",
+                "cmdb-process-1": "Nhóm đề xuất phân công đơn cấu hình cho nhóm phụ trách tương ứng theo loại CI",
+                "cmdb-process-2": "Nhóm chịu trách nhiệm duy trì CI tiến hành xử lý và hoàn tất việc đóng đơn cấu hình",
+                "implementation-title": "4. Thực hiện cập nhật phiên bản",
+                "implementation-desc-1": "Công việc cập nhật phiên bản phải <strong>tuân thủ hoàn toàn theo nội dung đã được phê duyệt trong đơn thay đổi ASE</strong>",
+                "implementation-desc-2": "Người thực hiện cập nhật phiên bản phải ghi lại đầy đủ kết quả cập nhật trong khu vực thảo luận của đơn thay đổi ASE",
+                "implementation-executor-title": "Người thực hiện được chỉ định (Executor)",
+                "implementation-executor-table-category": "Loại cập nhật",
+                "implementation-executor-table-executor": "Người thực hiện",
+                "implementation-executor-table-row1-category": "Phần mềm hệ thống liên quan bao gồm AP, DB, JOB, ESB, v.v.",
+                "implementation-executor-table-row1-executor": "DBA",
+                "implementation-executor-table-row2-category": "Phần cứng liên quan bao gồm Firewall, Server, UPS, v.v.",
+                "implementation-executor-table-row2-executor": "Nhóm Infra địa phương phụ trách",
+                "verification-title": "5. Nghiệm thu kết quả cập nhật phiên bản",
+                "verification-desc": "Sau khi cập nhật phiên bản hoàn tất, <strong>nhóm đề xuất</strong> sẽ tiến hành nghiệm thu kết quả cập nhật.",
+                "closure-title": "6. Kết thúc",
+                "closure-desc": "Do <strong>nhóm đề xuất</strong> nhấn <strong>hoàn thành</strong> trên đơn thay đổi -> kết thúc quy trình cập nhật phiên bản.",
+                "flowchart-title": "Sơ đồ quy trình thao tác đơn thay đổi (Change Flowchart)"
+            }
+        };
+
+        function changeLanguage(lang) {
+            const elements = document.querySelectorAll('[data-i18n]');
+            elements.forEach(element => {
+                const key = element.getAttribute('data-i18n');
+                if (translations[lang] && translations[lang][key]) {
+                    // Also update the title tag if the key is 'page-title'
+                    if (key === 'page-title') {
+                        document.title = translations[lang][key];
+                    }
+                    element.innerHTML = translations[lang][key];
+                }
+            });
+            // Update document language
+            document.documentElement.lang = lang;
+            // Store language preference
+            localStorage.setItem('selectedLanguage', lang);
+        }
+
+        // Language selector event
+        document.getElementById('language-selector').addEventListener('change', function() {
+            changeLanguage(this.value);
+        });
+
+        // Load saved language on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedLang = localStorage.getItem('selectedLanguage') || 'zh';
+            document.getElementById('language-selector').value = savedLang;
+            changeLanguage(savedLang);
+            // Also explicitly set the title on first load
+            document.title = translations[savedLang]['page-title'];
+        });
+    </script>
+</body>
+</html>
